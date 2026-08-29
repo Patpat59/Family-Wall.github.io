@@ -484,23 +484,24 @@
   <!-- FIREBASE SDK INITIALIZATION -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
+    import { getDatabase } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
     const firebaseConfig = {
-      apiKey: "AIzaSyCoxPwVHusLx4OjEnID5UzgURydpnPFgUQ",
-      authDomain: "base-donnees-patpat.firebaseapp.com",
-      projectId: "base-donnees-patpat",
-      storageBucket: "base-donnees-patpat.firebasestorage.app",
-      messagingSenderId: "702783219117",
-      appId: "1:702783219117:web:8afbca15e5afca2f876d24",
-      measurementId: "G-R4B4QL1C9K"
+      apiKey: "AIzaSyDvqnjdzXc8w5T7kKNYnM_nvFnvgBHTstc",
+      authDomain: "data-base-patpat.firebaseapp.com",
+      databaseURL: "https://data-base-patpat-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "data-base-patpat",
+      storageBucket: "data-base-patpat.firebasestorage.app",
+      messagingSenderId: "156302642596",
+      appId: "1:156302642596:web:79908c1088aee1bf49c531"
     };
 
-    // Initialisation
+    // Initialisation de Firebase avec vos configurations du projet data-base-patpat
     const app = initializeApp(firebaseConfig);
-    const analytics = getAnalytics(app);
+    const database = getDatabase(app);
     
     window.firebaseApp = app;
+    window.firebaseDatabase = database;
   </script>
 
   <!-- LOGIQUE DE L'APPLICATION -->
@@ -1597,7 +1598,8 @@
       const end = document.getElementById('event-end-input').value;
       const color = document.getElementById('event-color-input').value;
 
-      if (!title) return;
+      if (!title) return alert("Veuillez saisir au moins un titre.");
+
       presets.push({ id: Date.now(), title, start, end, color });
       localStorage.setItem('fw_event_presets', JSON.stringify(presets));
       renderPresets();
@@ -1610,58 +1612,57 @@
     }
 
     function openModal() {
+      openModalForDateAndHour(formatDateISO(new Date()), '08:00');
+    }
+
+    function openModalForDateAndHour(dateStr, hourStr) {
+      document.getElementById('modal-title').textContent = "Nouvel événement";
       document.getElementById('event-id').value = '';
       document.getElementById('event-title-input').value = '';
-      document.getElementById('event-date-input').value = formatDateISO(new Date());
+      document.getElementById('event-date-input').value = dateStr;
+      document.getElementById('event-start-input').value = hourStr;
+
+      const [h] = hourStr.split(':').map(Number);
+      const endH = Math.min(h + 1, 23);
+      document.getElementById('event-end-input').value = `${String(endH).padStart(2, '0')}:00`;
+
       document.getElementById('event-allday-input').checked = false;
-      document.getElementById('event-start-input').value = "08:00";
-      document.getElementById('event-end-input').value = "18:00";
-      document.getElementById('event-span-days').value = 1;
-      document.getElementById('recurrence-interval').value = 14;
-      document.getElementById('recurrence-count').value = 4;
-      document.getElementById('recurrence-enable').checked = false;
-      
       toggleAllDayFields();
+
+      document.getElementById('recurrence-enable').checked = false;
       toggleRecurrenceFields();
+
+      document.getElementById('btn-delete').classList.add('hidden');
+
       selectColor('bg-indigo-600 border-indigo-700');
       renderPresets();
 
-      document.getElementById('btn-delete').classList.add('hidden');
-      document.getElementById('modal-title').textContent = "Nouvel événement";
       document.getElementById('event-modal').classList.remove('hidden');
       document.getElementById('event-modal').classList.add('flex');
     }
 
-    function openModalForDateAndHour(dateStr, hourStr) {
-      openModal();
-      document.getElementById('event-date-input').value = dateStr;
-      document.getElementById('event-start-input').value = hourStr;
-      
-      const [h, m] = hourStr.split(':').map(Number);
-      const endH = Math.min(h + 1, 23);
-      document.getElementById('event-end-input').value = `${String(endH).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
-    }
-
     function editEvent(id) {
-      const event = events.find(e => e.id === id);
-      if (!event) return;
+      const e = events.find(item => item.id === id);
+      if (!e) return;
 
-      document.getElementById('event-id').value = event.id;
-      document.getElementById('event-title-input').value = event.title;
-      document.getElementById('event-date-input').value = event.date;
-      document.getElementById('event-allday-input').checked = !!event.allDay;
-      document.getElementById('event-start-input').value = event.start || "08:00";
-      document.getElementById('event-end-input').value = event.end || "18:00";
-      
+      document.getElementById('modal-title').textContent = "Modifier l'événement";
+      document.getElementById('event-id').value = e.id;
+      document.getElementById('event-title-input').value = e.title;
+      document.getElementById('event-date-input').value = e.date;
+      document.getElementById('event-start-input').value = e.start;
+      document.getElementById('event-end-input').value = e.end;
+
+      document.getElementById('event-allday-input').checked = !!e.allDay;
       toggleAllDayFields();
-      selectColor(event.color || 'bg-indigo-600 border-indigo-700');
-      renderPresets();
 
       document.getElementById('recurrence-enable').checked = false;
       toggleRecurrenceFields();
 
       document.getElementById('btn-delete').classList.remove('hidden');
-      document.getElementById('modal-title').textContent = "Modifier l'événement";
+
+      selectColor(e.color || 'bg-indigo-600 border-indigo-700');
+      renderPresets();
+
       document.getElementById('event-modal').classList.remove('hidden');
       document.getElementById('event-modal').classList.add('flex');
     }
@@ -1674,36 +1675,34 @@
     function saveEvent() {
       const id = document.getElementById('event-id').value;
       const title = document.getElementById('event-title-input').value.trim();
-      const startDateStr = document.getElementById('event-date-input').value;
+      const date = document.getElementById('event-date-input').value;
+      const start = document.getElementById('event-start-input').value;
+      const end = document.getElementById('event-end-input').value;
       const allDay = document.getElementById('event-allday-input').checked;
-      const start = allDay ? "06:00" : document.getElementById('event-start-input').value;
-      const end = allDay ? "23:59" : document.getElementById('event-end-input').value;
       const color = document.getElementById('event-color-input').value;
 
-      if (!title || !startDateStr) return;
+      if (!title || !date) return alert("Intitulé et date requis");
 
       const isRecurrence = document.getElementById('recurrence-enable').checked;
 
       if (id) {
-        // Édition événement unique
-        events = events.map(e => e.id == id ? { ...e, title, date: startDateStr, start, end, allDay, color } : e);
+        events = events.map(e => e.id == id ? { ...e, title, date, start, end, allDay, color } : e);
       } else if (isRecurrence) {
-        // Création avec roulement
         const spanDays = parseInt(document.getElementById('event-span-days').value) || 1;
-        const intervalDays = parseInt(document.getElementById('recurrence-interval').value) || 14;
-        const cycles = parseInt(document.getElementById('recurrence-count').value) || 1;
+        const interval = parseInt(document.getElementById('recurrence-interval').value) || 14;
+        const count = parseInt(document.getElementById('recurrence-count').value) || 4;
 
-        const baseDate = new Date(startDateStr);
+        let baseDate = new Date(date);
 
-        for (let c = 0; c < cycles; c++) {
-          for (let s = 0; s < spanDays; s++) {
-            const currentEvtDate = new Date(baseDate);
-            currentEvtDate.setDate(baseDate.getDate() + (c * intervalDays) + s);
+        for (let cycle = 0; cycle < count; cycle++) {
+          for (let dayOffset = 0; dayOffset < spanDays; dayOffset++) {
+            const evDate = new Date(baseDate);
+            evDate.setDate(baseDate.getDate() + (cycle * interval) + dayOffset);
 
             events.push({
               id: Date.now() + Math.random(),
               title,
-              date: formatDateISO(currentEvtDate),
+              date: formatDateISO(evDate),
               start,
               end,
               allDay,
@@ -1712,16 +1711,7 @@
           }
         }
       } else {
-        // Création unique
-        events.push({
-          id: Date.now(),
-          title,
-          date: startDateStr,
-          start,
-          end,
-          allDay,
-          color
-        });
+        events.push({ id: Date.now(), title, date, start, end, allDay, color });
       }
 
       localStorage.setItem('fw_week_events', JSON.stringify(events));
@@ -1732,27 +1722,26 @@
 
     function deleteCurrentEvent() {
       const id = document.getElementById('event-id').value;
-      if (id) {
-        deleteEventDirect(id);
-        closeModal();
-      }
+      if (id) deleteEventDirect(Number(id));
+      closeModal();
     }
 
     function deleteEventDirect(id) {
-      events = events.filter(e => e.id != id);
+      events = events.filter(e => e.id !== id);
       localStorage.setItem('fw_week_events', JSON.stringify(events));
       render();
       loadDashboardData();
     }
 
-    // --- INITIALISATION GLOBAL ---
-    window.onload = () => {
+    // --- INITIALISATION AU CHARGEMENT ---
+    window.addEventListener('DOMContentLoaded', () => {
       applyDarkMode();
       loadDashboardData();
       render();
       
-      document.getElementById('taskDate').value = getTodayString();
-    };
+      const taskDateEl = document.getElementById('taskDate');
+      if (taskDateEl) taskDateEl.value = getTodayString();
+    });
   </script>
 </body>
 </html>
