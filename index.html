@@ -109,7 +109,7 @@
           </div>
         </button>
 
-        <!-- NOURA CARTE : Résumé des tâches à faire (1 Colonne) -->
+        <!-- Résumé des tâches à faire (1 Colonne) -->
         <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col justify-between">
           <div>
             <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3 mb-3">
@@ -481,6 +481,29 @@
     </div>
   </div>
 
+  <!-- FIREBASE SDK INITIALIZATION -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCoxPwVHusLx4OjEnID5UzgURydpnPFgUQ",
+      authDomain: "base-donnees-patpat.firebaseapp.com",
+      projectId: "base-donnees-patpat",
+      storageBucket: "base-donnees-patpat.firebasestorage.app",
+      messagingSenderId: "702783219117",
+      appId: "1:702783219117:web:8afbca15e5afca2f876d24",
+      measurementId: "G-R4B4QL1C9K"
+    };
+
+    // Initialisation
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    
+    window.firebaseApp = app;
+  </script>
+
+  <!-- LOGIQUE DE L'APPLICATION -->
   <script>
     // --- GESTION DU MODE NUIT ---
     let isDarkModeAuto = true;
@@ -618,6 +641,14 @@
     }
 
     // --- MODULE TÂCHES ---
+    function getTodayString() {
+      const today = new Date();
+      const year = today.getFullYear();
+      const month = String(today.getMonth() + 1).padStart(2, '0');
+      const day = String(today.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
     const initialToday = getTodayString();
     const initialTasks = [
       { id: 101, title: "Changer la nappe du gimbal sur le DJI Mini 2", date: initialToday, repeat: "none", completed: false },
@@ -629,14 +660,6 @@
     ];
 
     let taskItems = JSON.parse(localStorage.getItem('my_tasks')) || JSON.parse(localStorage.getItem('fw_tasks_items')) || initialTasks;
-
-    function getTodayString() {
-      const today = new Date();
-      const year = today.getFullYear();
-      const month = String(today.getMonth() + 1).padStart(2, '0');
-      const day = String(today.getDate()).padStart(2, '0');
-      return `${year}-${month}-${day}`;
-    }
 
     function shouldShowToday(task, todayStr) {
       const today = new Date(todayStr);
@@ -1597,15 +1620,14 @@
       document.getElementById('recurrence-interval').value = 14;
       document.getElementById('recurrence-count').value = 4;
       document.getElementById('recurrence-enable').checked = false;
-      document.getElementById('recurrence-section').classList.remove('hidden');
       
       toggleAllDayFields();
-      selectColor('bg-indigo-600 border-indigo-700');
       toggleRecurrenceFields();
+      selectColor('bg-indigo-600 border-indigo-700');
       renderPresets();
 
-      document.getElementById('modal-title').textContent = "Nouvel événement";
       document.getElementById('btn-delete').classList.add('hidden');
+      document.getElementById('modal-title').textContent = "Nouvel événement";
       document.getElementById('event-modal').classList.remove('hidden');
       document.getElementById('event-modal').classList.add('flex');
     }
@@ -1614,29 +1636,32 @@
       openModal();
       document.getElementById('event-date-input').value = dateStr;
       document.getElementById('event-start-input').value = hourStr;
-      const startH = parseInt(hourStr.split(':')[0]);
-      const endH = String(Math.min(startH + 2, 23)).padStart(2, '0');
-      document.getElementById('event-end-input').value = `${endH}:00`;
+      
+      const [h, m] = hourStr.split(':').map(Number);
+      const endH = Math.min(h + 1, 23);
+      document.getElementById('event-end-input').value = `${String(endH).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
     }
 
     function editEvent(id) {
-      const ev = events.find(e => e.id === id);
-      if (!ev) return;
-      document.getElementById('event-id').value = ev.id;
-      document.getElementById('event-title-input').value = ev.title;
-      document.getElementById('event-date-input').value = ev.date;
-      document.getElementById('event-allday-input').checked = !!ev.allDay;
-      document.getElementById('event-start-input').value = ev.start || "08:00";
-      document.getElementById('event-end-input').value = ev.end || "18:00";
+      const event = events.find(e => e.id === id);
+      if (!event) return;
+
+      document.getElementById('event-id').value = event.id;
+      document.getElementById('event-title-input').value = event.title;
+      document.getElementById('event-date-input').value = event.date;
+      document.getElementById('event-allday-input').checked = !!event.allDay;
+      document.getElementById('event-start-input').value = event.start || "08:00";
+      document.getElementById('event-end-input').value = event.end || "18:00";
       
       toggleAllDayFields();
-      selectColor(ev.color || 'bg-indigo-600 border-indigo-700');
-      
-      document.getElementById('recurrence-section').classList.add('hidden');
+      selectColor(event.color || 'bg-indigo-600 border-indigo-700');
       renderPresets();
 
-      document.getElementById('modal-title').textContent = "Modifier l'événement";
+      document.getElementById('recurrence-enable').checked = false;
+      toggleRecurrenceFields();
+
       document.getElementById('btn-delete').classList.remove('hidden');
+      document.getElementById('modal-title').textContent = "Modifier l'événement";
       document.getElementById('event-modal').classList.remove('hidden');
       document.getElementById('event-modal').classList.add('flex');
     }
@@ -1648,40 +1673,55 @@
 
     function saveEvent() {
       const id = document.getElementById('event-id').value;
-      const title = document.getElementById('event-title-input').value;
+      const title = document.getElementById('event-title-input').value.trim();
       const startDateStr = document.getElementById('event-date-input').value;
-      const isAllDay = document.getElementById('event-allday-input').checked;
-      const start = isAllDay ? "06:00" : document.getElementById('event-start-input').value;
-      const end = isAllDay ? "23:59" : document.getElementById('event-end-input').value;
+      const allDay = document.getElementById('event-allday-input').checked;
+      const start = allDay ? "06:00" : document.getElementById('event-start-input').value;
+      const end = allDay ? "23:59" : document.getElementById('event-end-input').value;
       const color = document.getElementById('event-color-input').value;
 
       if (!title || !startDateStr) return;
 
-      if (id) {
-        const index = events.findIndex(e => e.id == id);
-        if (index !== -1) events[index] = { id: Number(id), title, date: startDateStr, start, end, allDay: isAllDay, color };
-      } else {
-        const isRecurring = document.getElementById('recurrence-enable').checked;
-        if (isRecurring) {
-          const spanDays = parseInt(document.getElementById('event-span-days').value) || 1;
-          const intervalDays = parseInt(document.getElementById('recurrence-interval').value) || 1;
-          const count = parseInt(document.getElementById('recurrence-count').value) || 1;
-          let cycleStartDate = new Date(startDateStr);
+      const isRecurrence = document.getElementById('recurrence-enable').checked;
 
-          for (let cycle = 0; cycle < count; cycle++) {
-            for (let dayOffset = 0; dayOffset < spanDays; dayOffset++) {
-              let currentEvDate = new Date(cycleStartDate);
-              currentEvDate.setDate(cycleStartDate.getDate() + dayOffset);
-              events.push({
-                id: Date.now() + Math.random(),
-                title, date: formatDateISO(currentEvDate), start, end, allDay: isAllDay, color
-              });
-            }
-            cycleStartDate.setDate(cycleStartDate.getDate() + intervalDays);
+      if (id) {
+        // Édition événement unique
+        events = events.map(e => e.id == id ? { ...e, title, date: startDateStr, start, end, allDay, color } : e);
+      } else if (isRecurrence) {
+        // Création avec roulement
+        const spanDays = parseInt(document.getElementById('event-span-days').value) || 1;
+        const intervalDays = parseInt(document.getElementById('recurrence-interval').value) || 14;
+        const cycles = parseInt(document.getElementById('recurrence-count').value) || 1;
+
+        const baseDate = new Date(startDateStr);
+
+        for (let c = 0; c < cycles; c++) {
+          for (let s = 0; s < spanDays; s++) {
+            const currentEvtDate = new Date(baseDate);
+            currentEvtDate.setDate(baseDate.getDate() + (c * intervalDays) + s);
+
+            events.push({
+              id: Date.now() + Math.random(),
+              title,
+              date: formatDateISO(currentEvtDate),
+              start,
+              end,
+              allDay,
+              color
+            });
           }
-        } else {
-          events.push({ id: Date.now(), title, date: startDateStr, start, end, allDay: isAllDay, color });
         }
+      } else {
+        // Création unique
+        events.push({
+          id: Date.now(),
+          title,
+          date: startDateStr,
+          start,
+          end,
+          allDay,
+          color
+        });
       }
 
       localStorage.setItem('fw_week_events', JSON.stringify(events));
@@ -1690,31 +1730,29 @@
       loadDashboardData();
     }
 
+    function deleteCurrentEvent() {
+      const id = document.getElementById('event-id').value;
+      if (id) {
+        deleteEventDirect(id);
+        closeModal();
+      }
+    }
+
     function deleteEventDirect(id) {
-      events = events.filter(e => e.id !== id);
+      events = events.filter(e => e.id != id);
       localStorage.setItem('fw_week_events', JSON.stringify(events));
       render();
       loadDashboardData();
     }
 
-    function deleteCurrentEvent() {
-      const id = document.getElementById('event-id').value;
-      if (!id) return;
-      deleteEventDirect(Number(id));
-      closeModal();
-    }
-
-    // --- INITIALISATION ---
-    document.getElementById('taskDate').value = getTodayString();
-    applyDarkMode();
-    loadDashboardData();
-    switchTab('dashboard'); 
-    
-    window.addEventListener('resize', () => {
-        if (!document.getElementById('view-agenda').classList.contains('hidden')) {
-            render();
-        }
-    });
+    // --- INITIALISATION GLOBAL ---
+    window.onload = () => {
+      applyDarkMode();
+      loadDashboardData();
+      render();
+      
+      document.getElementById('taskDate').value = getTodayString();
+    };
   </script>
 </body>
 </html>
