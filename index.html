@@ -3,1137 +3,344 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Family Wall</title>
+  <title>Planning & Organisation</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* Styles personnalisés et animations de transition */
+    .fade-in { animation: fadeIn 0.2s ease-in-out; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
     }
-  </script>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(156, 163, 175, 0.4); border-radius: 3px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(156, 163, 175, 0.6); }
+  </style>
 </head>
-<body class="bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-100 font-sans h-screen flex flex-col p-2 sm:p-4 overflow-hidden transition-colors duration-200">
+<body class="h-full bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-100 flex flex-col font-sans transition-colors duration-200">
 
   <!-- BARRE DE NAVIGATION PRINCIPALE -->
-  <nav class="max-w-[1600px] w-full mx-auto bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 mb-3 p-2 flex items-center justify-between shrink-0 transition-colors">
-    <div class="flex items-center gap-2">
-      <div class="w-9 h-9 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-lg shadow-xs">
-        <i class="fa-solid fa-house"></i>
-      </div>
-      <span class="font-bold text-slate-800 dark:text-slate-100 text-base hidden sm:inline">Family Wall</span>
-    </div>
-
-    <!-- ONGLETS -->
-    <div class="flex items-center gap-1 bg-slate-100 dark:bg-slate-900 p-1 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold overflow-x-auto">
-      <button id="tab-btn-dashboard" onclick="switchTab('dashboard')" class="px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center gap-1.5 shrink-0">
-        <i class="fa-solid fa-chart-pie"></i><span>Accueil</span>
-      </button>
-      <button id="tab-btn-agenda" onclick="switchTab('agenda')" class="px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center gap-1.5 shrink-0">
-        <i class="fa-solid fa-calendar-days"></i><span>Agenda</span>
-      </button>
-      <button id="tab-btn-menu" onclick="switchTab('menu')" class="px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center gap-1.5 shrink-0">
-        <i class="fa-solid fa-utensils"></i><span>Menus</span>
-      </button>
-      <button id="tab-btn-shopping" onclick="switchTab('shopping')" class="px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center gap-1.5 shrink-0">
-        <i class="fa-solid fa-cart-shopping"></i><span>Courses</span>
-      </button>
-      <button id="tab-btn-tasks" onclick="switchTab('tasks')" class="px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center gap-1.5 shrink-0">
-        <i class="fa-solid fa-list-check"></i><span>Tâches</span>
-      </button>
-    </div>
-
-    <!-- BOUTON MODE NUIT -->
-    <button onclick="toggleDarkModeManual()" title="Changer le mode d'affichage" class="w-9 h-9 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-700 text-slate-600 dark:text-amber-400 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-600 transition shrink-0">
-      <i id="theme-toggle-icon" class="fa-solid fa-moon"></i>
-    </button>
-  </nav>
-
-  <!-- CONTENEUR PRINCIPAL -->
-  <main class="w-full max-w-[1600px] mx-auto flex-1 min-h-0 relative">
-
-    <!-- SECTION 1 : DASHBOARD -->
-    <div id="view-dashboard" class="h-full overflow-y-auto space-y-4 pr-1">
-      <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row items-center justify-between gap-3">
-        <div>
-          <h1 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">Bonjour ! 👋</h1>
-          <p id="dash-date-txt" class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 capitalize mt-0.5">--</p>
+  <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-20 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="bg-indigo-600 text-white p-2 rounded-lg shadow">
+          <i class="fa-solid fa-calendar-days text-xl"></i>
         </div>
-        <button onclick="switchTab('agenda')" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl text-xs sm:text-sm shadow-sm flex items-center gap-2 transition">
-          <i class="fa-solid fa-calendar-days"></i> Ouvrir l'Agenda
+        <h1 class="text-xl font-bold bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">
+          Mon Planning
+        </h1>
+      </div>
+
+      <nav class="flex items-center space-x-1 sm:space-x-2">
+        <button onclick="switchView('dashboard')" id="nav-dashboard" class="px-3 py-2 rounded-lg text-sm font-medium transition-colors text-slate-600 hover:text-indigo-600 dark:text-slate-300 dark:hover:text-white flex items-center gap-2">
+          <i class="fa-solid fa-chart-line"></i> <span class="hidden sm:inline">Tableau de bord</span>
         </button>
-      </div>
-
-      <!-- BANDE CENTRALE REDIMENSIONNÉE À 4 COLONNES SUR GRAND ÉCRAN -->
-      <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
-        
-        <!-- Programme d'Aujourd'hui (2 Colonnes) -->
-        <section class="lg:col-span-2 bg-white dark:bg-slate-800 rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col justify-between">
-          <div>
-            <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3 mb-3">
-              <h2 class="font-bold text-slate-800 dark:text-slate-100 text-sm sm:text-base flex items-center gap-2">
-                <i class="fa-solid fa-clock text-indigo-600 dark:text-indigo-400"></i> Programme d'Aujourd'hui
-              </h2>
-              <span id="dash-event-badge" class="px-2.5 py-0.5 bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 rounded-full text-xs font-bold">0 événement</span>
-            </div>
-            <div id="dash-today-events" class="space-y-2"></div>
-          </div>
-          <div class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-700 flex justify-end">
-            <button onclick="switchTab('agenda')" class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1">
-              Voir tout le planning <i class="fa-solid fa-arrow-right text-[10px]"></i>
-            </button>
-          </div>
-        </section>
-
-        <!-- Repas du jour (1 Colonne) -->
-        <button onclick="openDatabaseModal()" class="w-full bg-gradient-to-br from-amber-500 to-orange-600 text-white rounded-2xl p-4 sm:p-5 shadow-sm flex flex-col justify-between group">
-          <div>
-            <div class="flex items-center justify-between pb-3 border-b border-white/20 mb-3">
-              <h2 class="font-bold text-sm sm:text-base flex items-center gap-2">
-                <i class="fa-solid fa-utensils"></i> Repas du jour
-              </h2>
-              <span class="text-[10px] bg-white/20 px-2 py-0.5 rounded-full uppercase font-semibold">Aperçu</span>
-            </div>
-            <div class="space-y-3 mt-2">
-              <div>
-                <span class="text-[11px] opacity-80 uppercase font-bold tracking-wider">Midi</span>
-                <p id="dash-lunch-preview" class="text-sm font-semibold italic">Non défini</p>
-              </div>
-              <div>
-                <span class="text-[11px] opacity-80 uppercase font-bold tracking-wider">Soir</span>
-                <p id="dash-dinner-preview" class="text-sm font-semibold italic">Non défini</p>
-              </div>
-            </div>
-          </div>
-          <div class="mt-4 w-full py-2 bg-white/20 group-hover:bg-white/30 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5">
-            <i class="fa-solid fa-pen-to-square"></i> <span id="dash-meal-db-link">Gérer la base de données (0 repas)</span>
-          </div>
+        <button onclick="switchView('calendar')" id="nav-calendar" class="px-3 py-2 rounded-lg text-sm font-medium transition-colors bg-indigo-50 text-indigo-600 dark:bg-indigo-950/50 dark:text-indigo-400 flex items-center gap-2">
+          <i class="fa-solid fa-calendar-week"></i> <span class="hidden sm:inline">Planning</span>
         </button>
-
-        <!-- Résumé des tâches à faire (1 Colonne) -->
-        <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col justify-between">
-          <div>
-            <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3 mb-3">
-              <h2 class="font-bold text-slate-800 dark:text-slate-100 text-sm sm:text-base flex items-center gap-2">
-                <i class="fa-solid fa-list-check text-sky-600 dark:text-sky-400"></i> Tâches du jour
-              </h2>
-              <span id="dash-task-badge" class="px-2.5 py-0.5 bg-sky-50 dark:bg-sky-950 text-sky-700 dark:text-sky-300 rounded-full text-xs font-bold">0 à faire</span>
-            </div>
-            <div id="dash-today-tasks" class="space-y-2"></div>
-          </div>
-          <div class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-700 flex justify-end">
-            <button onclick="switchTab('tasks')" class="text-xs font-semibold text-sky-600 dark:text-sky-400 hover:underline flex items-center gap-1">
-              Gérer toutes les tâches <i class="fa-solid fa-arrow-right text-[10px]"></i>
-            </button>
-          </div>
-        </div>
-
-      </div>
-
-      <div>
-        <h2 class="font-bold text-slate-800 dark:text-slate-100 text-base sm:text-lg mb-3">Modules de la maison</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          <div onclick="switchTab('agenda')" class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700 hover:border-indigo-400 transition cursor-pointer group">
-            <div class="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-lg mb-2 group-hover:scale-105 transition">
-              <i class="fa-solid fa-calendar-days"></i>
-            </div>
-            <h3 class="font-bold text-slate-800 dark:text-slate-100 text-sm">Agenda Partagé</h3>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Gardes, roulements et rendez-vous.</p>
-          </div>
-
-          <div onclick="switchTab('menu')" class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700 hover:border-amber-400 transition cursor-pointer group">
-            <div class="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950 text-amber-600 dark:text-amber-400 flex items-center justify-center text-lg mb-2 group-hover:scale-105 transition">
-              <i class="fa-solid fa-utensils"></i>
-            </div>
-            <h3 class="font-bold text-slate-800 dark:text-slate-100 text-sm">Menu Hebdomadaire</h3>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Planification et banque de repas.</p>
-          </div>
-
-          <div onclick="switchTab('shopping')" class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700 hover:border-emerald-400 transition cursor-pointer group">
-            <div class="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-lg mb-2 group-hover:scale-105 transition">
-              <i class="fa-solid fa-cart-shopping"></i>
-            </div>
-            <h3 class="font-bold text-slate-800 dark:text-slate-100 text-sm">Liste de Courses</h3>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Articles à acheter synchronisés.</p>
-          </div>
-
-          <div onclick="switchTab('tasks')" class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700 hover:border-sky-400 transition cursor-pointer group">
-            <div class="w-10 h-10 rounded-xl bg-sky-50 dark:bg-sky-950 text-sky-600 dark:text-sky-400 flex items-center justify-center text-lg mb-2 group-hover:scale-105 transition">
-              <i class="fa-solid fa-list-check"></i>
-            </div>
-            <h3 class="font-bold text-slate-800 dark:text-slate-100 text-sm">Tâches & Bricolage</h3>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Choses à faire et entretien.</p>
-          </div>
-        </div>
-      </div>
+        <button onclick="switchView('menu')" id="nav-menu" class="px-3 py-2 rounded-lg text-sm font-medium transition-colors text-slate-600 hover:text-indigo-600 dark:text-slate-300 dark:hover:text-white flex items-center gap-2">
+          <i class="fa-solid fa-utensils"></i> <span class="hidden sm:inline">Menus</span>
+        </button>
+        <button onclick="switchView('shopping')" id="nav-shopping" class="px-3 py-2 rounded-lg text-sm font-medium transition-colors text-slate-600 hover:text-indigo-600 dark:text-slate-300 dark:hover:text-white flex items-center gap-2">
+          <i class="fa-solid fa-cart-shopping"></i> <span class="hidden sm:inline">Courses</span>
+        </button>
+        <button onclick="switchView('tasks')" id="nav-tasks" class="px-3 py-2 rounded-lg text-sm font-medium transition-colors text-slate-600 hover:text-indigo-600 dark:text-slate-300 dark:hover:text-white flex items-center gap-2">
+          <i class="fa-solid fa-list-check"></i> <span class="hidden sm:inline">Tâches</span>
+        </button>
+      </nav>
     </div>
+  </header>
 
-    <!-- SECTION 2 : AGENDA COMPLET -->
-    <div id="view-agenda" class="h-full hidden bg-white dark:bg-slate-800 rounded-2xl shadow-md border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col">
-      <header class="bg-white dark:bg-slate-800 p-3 border-b border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row items-center justify-between gap-2 shrink-0">
+  <!-- CONTENU PRINCIPAL -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 overflow-y-auto custom-scrollbar">
+
+    <!-- VUE TABLEAU DE BORD -->
+    <section id="view-dashboard" class="hidden space-y-6 fade-in">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-center gap-4">
+          <div class="p-3 bg-indigo-100 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-400 rounded-lg">
+            <i class="fa-solid fa-calendar-day text-2xl"></i>
+          </div>
+          <div>
+            <p class="text-xs uppercase font-semibold text-slate-400">Aujourd'hui</p>
+            <h3 id="dash-today-events" class="text-2xl font-bold text-slate-800 dark:text-slate-100">0 événement</h3>
+          </div>
+        </div>
+        <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-center gap-4">
+          <div class="p-3 bg-emerald-100 text-emerald-600 dark:bg-emerald-900/50 dark:text-emerald-400 rounded-lg">
+            <i class="fa-solid fa-check-double text-2xl"></i>
+          </div>
+          <div>
+            <p class="text-xs uppercase font-semibold text-slate-400">Tâches restantes</p>
+            <h3 id="dash-pending-tasks" class="text-2xl font-bold text-slate-800 dark:text-slate-100">0 tâche</h3>
+          </div>
+        </div>
+        <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-center gap-4">
+          <div class="p-3 bg-amber-100 text-amber-600 dark:bg-amber-900/50 dark:text-amber-400 rounded-lg">
+            <i class="fa-solid fa-cart-shopping text-2xl"></i>
+          </div>
+          <div>
+            <p class="text-xs uppercase font-semibold text-slate-400">Articles à acheter</p>
+            <h3 id="dash-shopping-count" class="text-2xl font-bold text-slate-800 dark:text-slate-100">0 article</h3>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+          <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100 mb-4 flex items-center gap-2">
+            <i class="fa-solid fa-clock text-indigo-500"></i> Prochains événements
+          </h3>
+          <div id="dash-upcoming-list" class="space-y-3"></div>
+        </div>
+        <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+          <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100 mb-4 flex items-center gap-2">
+            <i class="fa-solid fa-utensils text-indigo-500"></i> Repas du jour
+          </h3>
+          <div id="dash-today-meals" class="space-y-3"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VUE PLANNING / CALENDRIER -->
+    <section id="view-calendar" class="space-y-4 fade-in">
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
         <div class="flex items-center gap-2">
-          <h1 id="date-display" class="font-bold text-slate-900 dark:text-white text-sm sm:text-base capitalize">--</h1>
-        </div>
-        <div class="flex items-center gap-1.5 sm:gap-2">
-          <div class="bg-slate-100 dark:bg-slate-900 p-0.5 rounded-lg flex border border-slate-200 dark:border-slate-700 text-xs font-semibold mr-1">
-            <button id="btn-view-day" onclick="setViewMode('day')" class="px-2.5 py-1 rounded-md text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition">
-              <i class="fa-solid fa-calendar-day mr-1"></i>Jour
-            </button>
-            <button id="btn-view-week" onclick="setViewMode('week')" class="px-2.5 py-1 rounded-md bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm transition">
-              <i class="fa-solid fa-calendar-week mr-1"></i>Semaine
-            </button>
-            <button id="btn-view-month" onclick="setViewMode('month')" class="px-2.5 py-1 rounded-md text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition">
-              <i class="fa-solid fa-calendar-days mr-1"></i>Mois
-            </button>
-          </div>
-          <button onclick="navigatePeriod(-1)" class="px-2.5 py-1 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg text-slate-600 dark:text-slate-300 text-xs font-medium"><i class="fa-solid fa-chevron-left"></i></button>
-          <button onclick="goToToday()" class="px-2.5 py-1 bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900 rounded-lg text-xs font-semibold">Aujourd'hui</button>
-          <button onclick="navigatePeriod(1)" class="px-2.5 py-1 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg text-slate-600 dark:text-slate-300 text-xs font-medium"><i class="fa-solid fa-chevron-right"></i></button>
-          <button onclick="openModal()" class="ml-1 px-3 py-1 bg-indigo-600 text-white hover:bg-indigo-700 rounded-lg text-xs font-medium shadow-sm flex items-center gap-1.5">
-            <i class="fa-solid fa-plus"></i><span class="hidden sm:inline">Ajouter</span>
+          <button onclick="changeWeek(-1)" class="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors">
+            <i class="fa-solid fa-chevron-left"></i>
           </button>
-        </div>
-      </header>
-
-      <!-- VUE JOUR -->
-      <div id="day-view-container" class="flex-1 flex flex-col min-h-0 hidden overflow-hidden">
-        <div class="flex-1 flex flex-col h-full">
-          <div class="grid grid-cols-[60px_1fr] bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700 text-center font-semibold text-xs text-slate-600 dark:text-slate-400 shadow-sm shrink-0" id="day-header"></div>
-          <div class="relative flex-1 flex flex-col min-h-0" id="day-planning-container">
-            <div id="day-grid" class="flex-1 flex flex-col divide-y divide-slate-100 dark:divide-slate-700/50 min-h-0"></div>
-            <div id="day-events-layer" class="absolute inset-0 pointer-events-none grid grid-cols-[60px_1fr]">
-              <div></div>
-              <div class="col-day-single relative pointer-events-auto" data-day="0"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- VUE SEMAINE -->
-      <div id="week-view-container" class="flex-1 flex flex-col min-h-0 overflow-x-auto">
-        <div class="min-w-[800px] flex-1 flex flex-col h-full">
-          <div class="grid grid-cols-[60px_repeat(7,1fr)] bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700 text-center font-semibold text-xs text-slate-600 dark:text-slate-400 shadow-sm shrink-0" id="week-header"></div>
-          <div class="relative flex-1 flex flex-col min-h-0" id="planning-container">
-            <div id="week-grid" class="flex-1 flex flex-col divide-y divide-slate-100 dark:divide-slate-700/50 min-h-0"></div>
-            <div id="events-layer" class="absolute inset-0 pointer-events-none grid grid-cols-[60px_repeat(7,1fr)]">
-              <div></div>
-              <div class="col-day relative pointer-events-auto" data-day="0"></div>
-              <div class="col-day relative pointer-events-auto" data-day="1"></div>
-              <div class="col-day relative pointer-events-auto" data-day="2"></div>
-              <div class="col-day relative pointer-events-auto" data-day="3"></div>
-              <div class="col-day relative pointer-events-auto" data-day="4"></div>
-              <div class="col-day relative pointer-events-auto" data-day="5"></div>
-              <div class="col-day relative pointer-events-auto" data-day="6"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- VUE MOIS -->
-      <div id="month-view-container" class="flex-1 flex flex-col min-h-0 hidden p-2 overflow-hidden">
-        <div class="grid grid-cols-7 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-t-xl text-center font-bold text-xs text-slate-600 dark:text-slate-400 py-2 shrink-0">
-          <div>Lun</div><div>Mar</div><div>Mer</div><div>Jeu</div><div>Ven</div><div>Sam</div><div>Dim</div>
-        </div>
-        <div id="month-grid" class="flex-1 grid grid-cols-7 grid-rows-6 gap-1 bg-slate-200 dark:bg-slate-900 p-1 rounded-b-xl border-x border-b border-slate-200 dark:border-slate-700 overflow-hidden min-h-0"></div>
-      </div>
-    </div>
-
-    <!-- SECTION 3 : MENUS -->
-    <div id="view-menu" class="h-full bg-white dark:bg-slate-800 rounded-2xl p-4 sm:p-6 shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col max-w-5xl mx-auto overflow-hidden">
-      
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4 shrink-0">
-        <div class="md:col-span-2 bg-gradient-to-r from-amber-500 to-orange-500 rounded-2xl p-5 sm:p-6 text-white shadow-md flex items-center justify-between">
-          <div>
-            <span class="text-xs sm:text-sm font-black uppercase tracking-widest bg-white/30 text-white px-3 py-1 rounded-full shadow-xs">Prochain Repas</span>
-            <h2 id="next-meal-title" class="text-2xl sm:text-3xl font-extrabold mt-2 tracking-tight drop-shadow-xs">--</h2>
-            <p id="next-meal-desc" class="text-xl sm:text-3xl font-black mt-1 text-white tracking-wide uppercase drop-shadow-sm">Chargement...</p>
-          </div>
-          <i class="fa-solid fa-utensils text-4xl sm:text-5xl opacity-30"></i>
-        </div>
-
-        <div class="bg-slate-50 dark:bg-slate-900 rounded-2xl p-3 border border-slate-200 dark:border-slate-700 flex flex-col justify-between gap-2">
-          <div class="flex justify-between items-center">
-            <span class="text-xs font-bold text-slate-700 dark:text-slate-300"><i class="fa-solid fa-lightbulb text-amber-500 mr-1"></i> Idées de repas</span>
-            <button onclick="openDatabaseModal()" class="text-[10px] bg-amber-100 text-amber-800 dark:bg-amber-900/60 dark:text-amber-300 font-bold px-2 py-0.5 rounded-full hover:bg-amber-200 transition-colors">
-                <span id="meal-bank-count">0 enregistrés</span>
-                <i class="fa-solid fa-arrow-right ml-1"></i>
-            </button>
-          </div>
-          <button onclick="proposerRepasAncien()" class="w-full py-1.5 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-xs">
-            <i class="fa-solid fa-wand-magic-sparkles"></i> Proposer un repas ancien
+          <button onclick="goToToday()" class="px-3 py-1.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-sm font-medium rounded-lg transition-colors">
+            Aujourd'hui
           </button>
-          <div id="suggestion-box" class="hidden p-2 bg-amber-100/70 dark:bg-amber-950/50 border border-amber-300 dark:border-amber-700 rounded-xl text-xs text-amber-900 dark:text-amber-200 font-bold text-center"></div>
-          <button onclick="openPlannerModal()" class="w-full py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl text-xs transition flex items-center justify-center gap-1.5">
-            <i class="fa-solid fa-calendar-plus"></i> Planifier sur plusieurs jours
+          <button onclick="changeWeek(1)" class="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors">
+            <i class="fa-solid fa-chevron-right"></i>
           </button>
+          <span id="current-week-title" class="text-lg font-bold ml-2"></span>
         </div>
-      </div>
 
-      <div class="flex items-center justify-between mb-3 bg-slate-50 dark:bg-slate-900/50 p-2 rounded-xl border border-slate-200 dark:border-slate-700 shrink-0">
-        <button onclick="navigateMenuWeek(-1)" class="px-2.5 py-1 border border-slate-200 dark:border-slate-700 hover:bg-white dark:hover:bg-slate-800 rounded-lg text-slate-600 dark:text-slate-300 text-xs font-medium"><i class="fa-solid fa-chevron-left"></i> Semaine précédente</button>
-        <span id="menu-week-title" class="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200 capitalize">--</span>
-        <button onclick="navigateMenuWeek(1)" class="px-2.5 py-1 border border-slate-200 dark:border-slate-700 hover:bg-white dark:hover:bg-slate-800 rounded-lg text-slate-600 dark:text-slate-300 text-xs font-medium">Semaine suivante <i class="fa-solid fa-chevron-right"></i></button>
-      </div>
-
-      <div class="flex-1 overflow-y-auto pr-1 space-y-3" id="menu-days-container"></div>
-    </div>
-
-    <!-- SECTION 4 : LISTE DE COURSES -->
-    <div id="view-shopping" class="h-full bg-white dark:bg-slate-800 rounded-2xl p-4 sm:p-6 shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col max-w-3xl mx-auto">
-      <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-4 mb-4 shrink-0">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-xl">
-            <i class="fa-solid fa-cart-shopping"></i>
+          <div class="inline-flex rounded-lg border border-slate-200 dark:border-slate-700 p-1 bg-slate-50 dark:bg-slate-900">
+            <button onclick="setCalendarMode('week')" id="mode-week-btn" class="px-3 py-1 text-xs font-semibold rounded-md bg-white dark:bg-slate-800 shadow-sm">
+              Semaine
+            </button>
+            <button onclick="setCalendarMode('month')" id="mode-month-btn" class="px-3 py-1 text-xs font-semibold rounded-md text-slate-500 hover:text-slate-900 dark:hover:text-white">
+              Mois
+            </button>
           </div>
-          <div>
-            <h1 class="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">Liste de Courses</h1>
-            <p id="shopping-count" class="text-xs text-slate-500 dark:text-slate-400">0 article à acheter</p>
-          </div>
+          <button onclick="openModalForNewEvent()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-sm rounded-lg shadow-sm transition-colors flex items-center gap-2">
+            <i class="fa-solid fa-plus"></i> Événement
+          </button>
         </div>
-        <button onclick="clearCompletedShopping()" class="text-xs font-medium text-slate-400 hover:text-rose-600 transition flex items-center gap-1">
-          <i class="fa-solid fa-trash-can"></i> <span class="hidden sm:inline">Nettoyer les cochés</span>
-        </button>
       </div>
 
-      <div class="flex gap-2 mb-4 shrink-0">
-        <input type="text" id="shopping-input" placeholder="Ajouter un article puis faites Entrée" 
-               onkeydown="if(event.key === 'Enter') addShoppingItem()"
-               class="flex-1 p-3 border border-slate-200 dark:border-slate-700 dark:bg-slate-900 dark:text-white rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-500 transition shadow-xs">
-        <button onclick="addShoppingItem()" class="px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-semibold text-sm transition shrink-0 flex items-center justify-center">
-          <i class="fa-solid fa-plus sm:mr-1"></i> <span class="hidden sm:inline">Ajouter</span>
-        </button>
+      <div id="preset-buttons-bar" class="flex flex-wrap gap-2 py-1"></div>
+
+      <div class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
+        <div id="calendar-grid-header" class="grid grid-cols-8 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-center text-xs font-semibold uppercase text-slate-500 py-3"></div>
+        <div id="calendar-grid-body" class="divide-y divide-slate-200 dark:divide-slate-700 max-h-[600px] overflow-y-auto custom-scrollbar"></div>
       </div>
+    </section>
 
-      <div class="flex-1 overflow-y-auto pr-1 space-y-2" id="shopping-list-container"></div>
-    </div>
-
-    <!-- SECTION 5 : TÂCHES & BRICOLAGE -->
-    <div id="view-tasks" class="h-full bg-white dark:bg-slate-800 rounded-2xl p-4 sm:p-6 shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col max-w-3xl mx-auto">
-      <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-4 mb-4 shrink-0">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-sky-50 dark:bg-sky-950 text-sky-600 dark:text-sky-400 flex items-center justify-center text-xl">
-            <i class="fa-solid fa-list-check"></i>
-          </div>
-          <div>
-            <h1 class="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">Tâches & Bricolage</h1>
-            <p id="tasks-count" class="text-xs text-slate-500 dark:text-slate-400">0 tâche prévue aujourd'hui</p>
-          </div>
-        </div>
-        <button onclick="clearCompletedTasks()" class="text-xs font-medium text-slate-400 hover:text-rose-600 transition flex items-center gap-1">
-          <i class="fa-solid fa-trash-can"></i> <span class="hidden sm:inline">Nettoyer les terminées</span>
-        </button>
+    <!-- VUE MENUS DU MOIS -->
+    <section id="view-menu" class="hidden space-y-4 fade-in">
+      <div class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex justify-between items-center">
+        <h2 class="text-lg font-bold flex items-center gap-2">
+          <i class="fa-solid fa-utensils text-indigo-500"></i> Planification des repas
+        </h2>
+        <span id="menu-month-title" class="font-semibold text-slate-500"></span>
       </div>
+      <div id="menu-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
+    </section>
 
-      <form id="taskForm" onsubmit="addTaskItem(event)" class="flex flex-col sm:flex-row gap-2 mb-4 shrink-0">
-        <input type="text" id="taskTitle" placeholder="Intitulé de la tâche" required
-               class="flex-1 p-3 border border-slate-200 dark:border-slate-700 dark:bg-slate-900 dark:text-white rounded-xl text-sm outline-none focus:ring-2 focus:ring-sky-500 transition shadow-xs">
-        <input type="date" id="taskDate" required
-               class="p-3 border border-slate-200 dark:border-slate-700 dark:bg-slate-900 dark:text-white rounded-xl text-sm outline-none focus:ring-2 focus:ring-sky-500 transition shadow-xs">
-        <select id="taskRepeat" class="p-3 border border-slate-200 dark:border-slate-700 dark:bg-slate-900 dark:text-white rounded-xl text-sm outline-none focus:ring-2 focus:ring-sky-500 transition shadow-xs">
-          <option value="none">Une seule fois</option>
-          <option value="daily">Tous les jours</option>
-          <option value="weekly">Toutes les semaines</option>
-          <option value="monthly">Tous les mois</option>
-        </select>
-        <button type="submit" class="px-4 py-3 bg-sky-600 hover:bg-sky-700 text-white rounded-xl font-semibold text-sm transition shrink-0 flex items-center justify-center gap-1">
-          <i class="fa-solid fa-plus"></i> <span class="hidden sm:inline">Ajouter</span>
-        </button>
-      </form>
+    <!-- VUE LISTE DE COURSES -->
+    <section id="view-shopping" class="hidden space-y-4 fade-in">
+      <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm max-w-2xl mx-auto space-y-4">
+        <h2 class="text-lg font-bold flex items-center gap-2">
+          <i class="fa-solid fa-cart-shopping text-indigo-500"></i> Liste de courses
+        </h2>
+        <form onsubmit="addShoppingItem(event)" class="flex gap-2">
+          <input type="text" id="shopping-input" placeholder="Ajouter un article..." class="flex-1 px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-transparent focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors">
+            Ajouter
+          </button>
+        </form>
+        <ul id="shopping-list" class="divide-y divide-slate-200 dark:divide-slate-700"></ul>
+      </div>
+    </section>
 
-      <div class="flex-1 overflow-y-auto pr-1 space-y-2" id="tasks-list-container"></div>
-    </div>
+    <!-- VUE TÂCHES -->
+    <section id="view-tasks" class="hidden space-y-4 fade-in">
+      <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm max-w-2xl mx-auto space-y-4">
+        <h2 class="text-lg font-bold flex items-center gap-2">
+          <i class="fa-solid fa-list-check text-indigo-500"></i> Liste de tâches
+        </h2>
+        <form onsubmit="addTaskItem(event)" class="flex gap-2">
+          <input type="text" id="task-input" placeholder="Nouvelle tâche..." class="flex-1 px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-transparent focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors">
+            Ajouter
+          </button>
+        </form>
+        <ul id="tasks-list" class="divide-y divide-slate-200 dark:divide-slate-700"></ul>
+      </div>
+    </section>
 
   </main>
 
-  <!-- MODALE AGENDA -->
-  <div id="event-modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center p-4 z-50">
-    <div class="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-md p-5 shadow-xl space-y-3 max-h-[90vh] overflow-y-auto text-slate-800 dark:text-slate-100">
-      <h3 id="modal-title" class="font-bold text-lg">Nouvel événement</h3>
+  <!-- MODAL ÉVÉNEMENT -->
+  <div id="event-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+    <div class="bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 max-w-md w-full p-6 space-y-4 fade-in">
+      <div class="flex justify-between items-center">
+        <h3 id="modal-title" class="text-lg font-bold">Événement</h3>
+        <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-white">
+          <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
+      </div>
+
       <input type="hidden" id="event-id">
 
-      <div id="preset-section" class="bg-slate-50 dark:bg-slate-900/50 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1.5">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-bold"><i class="fa-solid fa-bookmark text-indigo-600 dark:text-indigo-400 mr-1"></i> Modèles rapides</span>
-          <button type="button" onclick="saveCurrentAsPreset()" class="text-[11px] text-indigo-600 dark:text-indigo-400 hover:underline font-semibold">+ Sauvegarder</button>
-        </div>
-        <div id="preset-buttons" class="flex flex-wrap gap-1.5 pt-1"></div>
-      </div>
-
-      <div>
-        <label class="text-xs font-semibold text-slate-500 dark:text-slate-400">Intitulé</label>
-        <input type="text" id="event-title-input" placeholder="ex: Garde jour, Repos..." class="w-full mt-1 p-2 border border-slate-300 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500">
-      </div>
-
-      <div>
-        <label class="text-xs font-semibold text-slate-500 dark:text-slate-400">Date de départ</label>
-        <input type="date" id="event-date-input" class="w-full mt-1 p-2 border border-slate-300 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-sm outline-none">
-      </div>
-
-      <div class="flex items-center gap-2 pt-1">
-        <input type="checkbox" id="event-allday-input" onchange="toggleAllDayFields()" class="w-4 h-4 text-indigo-600 rounded cursor-pointer">
-        <label for="event-allday-input" class="text-xs font-bold text-slate-700 dark:text-slate-300 cursor-pointer">Journée entière</label>
-      </div>
-
-      <div id="time-inputs-container" class="grid grid-cols-2 gap-2">
+      <div class="space-y-3">
         <div>
-          <label class="text-xs font-semibold text-slate-500 dark:text-slate-400">Début</label>
-          <input type="time" id="event-start-input" value="08:00" class="w-full mt-1 p-2 border border-slate-300 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-sm outline-none">
+          <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Titre</label>
+          <input type="text" id="event-title-input" class="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-transparent focus:ring-2 focus:ring-indigo-500">
         </div>
+
         <div>
-          <label class="text-xs font-semibold text-slate-500 dark:text-slate-400">Fin</label>
-          <input type="time" id="event-end-input" value="18:00" class="w-full mt-1 p-2 border border-slate-300 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-sm outline-none">
-        </div>
-      </div>
-
-      <div>
-        <label class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5 block">Couleur d'affichage</label>
-        <input type="hidden" id="event-color-input" value="bg-indigo-600 border-indigo-700">
-        <div id="color-picker-container" class="grid grid-cols-6 gap-2 bg-slate-50 dark:bg-slate-900/50 p-2 rounded-xl border border-slate-200 dark:border-slate-700"></div>
-      </div>
-
-      <div id="recurrence-section" class="border-t border-slate-200 dark:border-slate-700 pt-3 space-y-2">
-        <div class="flex items-center justify-between">
-          <label class="text-xs font-bold text-indigo-700 dark:text-indigo-400 flex items-center gap-1">
-            <i class="fa-solid fa-arrows-rotate"></i> Configurer un roulement
-          </label>
-          <input type="checkbox" id="recurrence-enable" onchange="toggleRecurrenceFields()" class="w-4 h-4 text-indigo-600 rounded">
+          <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Date</label>
+          <input type="date" id="event-date-input" class="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-transparent focus:ring-2 focus:ring-indigo-500">
         </div>
 
-        <div id="recurrence-fields" class="hidden space-y-2.5 bg-indigo-50/50 dark:bg-indigo-950/30 p-3 rounded-xl border border-indigo-100 dark:border-indigo-900 text-xs">
-          <div class="flex items-center justify-between gap-2">
-            <span class="text-slate-600 dark:text-slate-300">Durée sur place :</span>
-            <div class="flex items-center gap-1">
-              <input type="number" id="event-span-days" value="1" min="1" max="14" class="w-14 p-1 border border-slate-300 dark:border-slate-700 dark:bg-slate-900 rounded text-center font-bold">
-              <span class="text-slate-600 dark:text-slate-300">jour(s)</span>
+        <div class="flex items-center gap-2 pt-1">
+          <input type="checkbox" id="event-allday-input" onchange="toggleAllDayFields()" class="rounded text-indigo-600 focus:ring-indigo-500">
+          <label for="event-allday-input" class="text-sm font-medium">Journée entière</label>
+        </div>
+
+        <div id="time-fields" class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Début</label>
+            <input type="time" id="event-start-input" class="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-transparent">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Fin</label>
+            <input type="time" id="event-end-input" class="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-transparent">
+          </div>
+        </div>
+
+        <!-- RECURRENCE ROULANTE -->
+        <div class="border-t border-slate-200 dark:border-slate-700 pt-3 space-y-2">
+          <div class="flex items-center gap-2">
+            <input type="checkbox" id="recurrence-enable" onchange="toggleRecurrenceFields()" class="rounded text-indigo-600 focus:ring-indigo-500">
+            <label for="recurrence-enable" class="text-sm font-semibold">Répétition / Roulement</label>
+          </div>
+
+          <div id="recurrence-fields" class="hidden space-y-2 pl-6 text-sm">
+            <div class="flex items-center gap-2">
+              <span>Durée :</span>
+              <input type="number" id="event-span-days" value="1" min="1" max="14" class="w-16 px-2 py-1 border rounded text-center dark:bg-slate-700">
+              <span>jour(s) consécutif(s)</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span>Tous les :</span>
+              <input type="number" id="recurrence-interval" value="14" min="1" class="w-16 px-2 py-1 border rounded text-center dark:bg-slate-700">
+              <span>jours</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span>Répéter :</span>
+              <input type="number" id="recurrence-count" value="6" min="1" max="52" class="w-16 px-2 py-1 border rounded text-center dark:bg-slate-700">
+              <span>fois</span>
             </div>
           </div>
-          <div class="flex items-center justify-between gap-2">
-            <span class="text-slate-600 dark:text-slate-300">Répéter tous les :</span>
-            <div class="flex items-center gap-1">
-              <input type="number" id="recurrence-interval" value="14" min="1" max="90" class="w-14 p-1 border border-slate-300 dark:border-slate-700 dark:bg-slate-900 rounded text-center font-bold">
-              <span class="text-slate-600 dark:text-slate-300">jours</span>
-            </div>
+        </div>
+
+        <!-- COULEUR -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Couleur</label>
+          <div class="flex items-center gap-2" id="color-picker-options">
+            <button type="button" onclick="selectColor('bg-indigo-600 border-indigo-700')" class="w-6 h-6 rounded-full bg-indigo-600 ring-2 ring-offset-1 ring-indigo-600"></button>
+            <button type="button" onclick="selectColor('bg-emerald-600 border-emerald-700')" class="w-6 h-6 rounded-full bg-emerald-600"></button>
+            <button type="button" onclick="selectColor('bg-amber-600 border-amber-700')" class="w-6 h-6 rounded-full bg-amber-600"></button>
+            <button type="button" onclick="selectColor('bg-rose-600 border-rose-700')" class="w-6 h-6 rounded-full bg-rose-600"></button>
+            <button type="button" onclick="selectColor('bg-sky-600 border-sky-700')" class="w-6 h-6 rounded-full bg-sky-600"></button>
           </div>
-          <div class="flex items-center justify-between gap-2">
-            <span class="text-slate-600 dark:text-slate-300">Nombre de cycles :</span>
-            <input type="number" id="recurrence-count" value="4" min="1" max="52" class="w-16 p-1 border border-slate-300 dark:border-slate-700 dark:bg-slate-900 rounded text-center font-bold">
-          </div>
+          <input type="hidden" id="event-color-input" value="bg-indigo-600 border-indigo-700">
         </div>
       </div>
 
-      <div class="flex justify-between items-center pt-2 border-t border-slate-100 dark:border-slate-700">
-        <button type="button" id="btn-delete" onclick="deleteCurrentEvent()" class="text-rose-600 text-xs font-bold hidden hover:underline">Supprimer</button>
+      <div class="flex justify-between items-center pt-4 border-t border-slate-200 dark:border-slate-700">
+        <button id="btn-delete" onclick="deleteCurrentEvent()" type="button" class="px-3 py-1.5 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/50 rounded-lg text-sm font-medium transition-colors hidden">
+          Supprimer
+        </button>
         <div class="flex gap-2 ml-auto">
-          <button type="button" onclick="closeModal()" class="px-3 py-2 text-xs text-slate-500 font-medium">Annuler</button>
-          <button type="button" onclick="saveEvent()" class="px-4 py-2 text-xs bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg shadow-sm">Enregistrer</button>
+          <button onclick="closeModal()" type="button" class="px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-700">
+            Annuler
+          </button>
+          <button onclick="saveEvent()" type="button" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium shadow-sm">
+            Enregistrer
+          </button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- MODALE PLANIFICATEUR EXTENSIF DE REPAS -->
-  <div id="planner-modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center p-4 z-50">
-    <div class="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-2xl p-5 shadow-xl flex flex-col max-h-[90vh] text-slate-800 dark:text-slate-100">
-      <div class="flex justify-between items-center pb-3 border-b border-slate-200 dark:border-slate-700 shrink-0">
-        <div>
-          <h3 class="font-bold text-base sm:text-lg text-slate-900 dark:text-white"><i class="fa-solid fa-calendar-days text-amber-500 mr-2"></i>Planification des repas</h3>
-          <p class="text-xs text-slate-500 dark:text-slate-400">Saisie continue sur la durée de votre choix avec suggestions d'idées anciennes.</p>
-        </div>
-        <button onclick="closePlannerModal()" class="text-slate-400 hover:text-slate-600 p-1"><i class="fa-solid fa-xmark text-lg"></i></button>
-      </div>
-
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 py-3 border-b border-slate-100 dark:border-slate-700 shrink-0">
-        <div>
-          <label class="text-xs font-bold text-slate-600 dark:text-slate-400">Date de début :</label>
-          <input type="date" id="planner-start-date" onchange="generatePlannerRows()" class="w-full mt-1 p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold outline-none focus:ring-1 focus:ring-amber-500">
-        </div>
-        <div>
-          <label class="text-xs font-bold text-slate-600 dark:text-slate-400">Nombre de jours à planifier :</label>
-          <input type="number" id="planner-days-count" value="7" min="1" max="31" onchange="generatePlannerRows()" class="w-full mt-1 p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-center outline-none focus:ring-1 focus:ring-amber-500">
-        </div>
-      </div>
-
-      <div class="flex-1 overflow-y-auto py-3 space-y-3 pr-1" id="planner-rows-container"></div>
-
-      <div class="pt-3 border-t border-slate-100 dark:border-slate-700 flex justify-end gap-2 shrink-0">
-        <button onclick="closePlannerModal()" class="px-4 py-2 text-xs text-slate-500 font-medium">Fermer</button>
-        <button onclick="savePlannerSession()" class="px-5 py-2 text-xs bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl shadow-sm">Enregistrer toute la période</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MEAL DATABASE MANAGER MODAL -->
-  <div id="db-modal" class="fixed inset-0 bg-black/70 hidden items-center justify-center p-4 z-50">
-    <div class="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-3xl p-5 shadow-xl flex flex-col max-h-[90vh] text-slate-800 dark:text-slate-100 overflow-hidden">
-        <header class="flex justify-between items-center pb-3 border-b border-slate-100 dark:border-slate-700 shrink-0">
-            <h3 class="font-bold text-lg text-slate-900 dark:text-white"><i class="fa-solid fa-database text-amber-500 mr-2"></i>Base de données des repas</h3>
-            <button onclick="closeDatabaseModal()" class="text-slate-400 hover:text-slate-600 p-1"><i class="fa-solid fa-xmark text-lg"></i></button>
-        </header>
-
-        <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border border-slate-100 dark:border-slate-700 my-3 shrink-0">
-            <p class="text-xs text-slate-600 dark:text-slate-400">Ci-dessous se trouve la liste de tous les repas que vous avez planifiés. Vous pouvez les renommer ou les supprimer définitivement de la base de données. Ces modifications n'affectent pas les menus déjà planifiés dans le passé, mais uniquement les suggestions futures.</p>
-        </div>
-
-        <div class="flex-1 overflow-y-auto pr-2 space-y-2" id="db-meal-list"></div>
-
-        <footer class="pt-3 border-t border-slate-100 dark:border-slate-700 flex justify-end gap-2 shrink-0">
-            <button onclick="closeDatabaseModal()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-semibold transition">Fermer</button>
-        </footer>
-    </div>
-  </div>
-
-  <!-- FIREBASE SDK INITIALIZATION -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getDatabase } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyDvqnjdzXc8w5T7kKNYnM_nvFnvgBHTstc",
-      authDomain: "data-base-patpat.firebaseapp.com",
-      databaseURL: "https://data-base-patpat-default-rtdb.europe-west1.firebasedatabase.app",
-      projectId: "data-base-patpat",
-      storageBucket: "data-base-patpat.firebasestorage.app",
-      messagingSenderId: "156302642596",
-      appId: "1:156302642596:web:79908c1088aee1bf49c531"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const database = getDatabase(app);
-    
-    window.firebaseApp = app;
-    window.firebaseDatabase = database;
-  </script>
-
-  <!-- LOGIQUE DE L'APPLICATION -->
+  <!-- JAVASCRIPT APP LOGIC -->
   <script>
-    // --- GESTION DU MODE NUIT ---
-    let isDarkModeAuto = true;
+    // --- ÉTAT GLOBAL ---
+    let currentDate = new Date();
+    let currentView = 'calendar';
+    let calendarMode = 'week'; // 'week' ou 'month'
+    let events = JSON.parse(localStorage.getItem('fw_week_events')) || [];
+    let shoppingList = JSON.parse(localStorage.getItem('fw_shopping_list')) || [];
+    let tasksList = JSON.parse(localStorage.getItem('fw_tasks_list')) || [];
+    let menuList = JSON.parse(localStorage.getItem('fw_menu_list')) || {};
 
+    const PRESETS = [
+      { label: 'Garde 24h', color: 'bg-rose-600 border-rose-700', start: '07:00', end: '07:00', span: 1 },
+      { label: 'Garde Jour (12h)', color: 'bg-amber-600 border-amber-700', start: '07:00', end: '19:00', span: 1 },
+      { label: 'Garde Nuit (12h)', color: 'bg-indigo-600 border-indigo-700', start: '19:00', end: '07:00', span: 1 },
+      { label: 'Repos', color: 'bg-emerald-600 border-emerald-700', allDay: true, span: 1 }
+    ];
+
+    // --- AUTOMATISATION ET HEURES (MODE NUIT AUTOMATIQUE) ---
     function applyDarkMode() {
       const hour = new Date().getHours();
-      const isNight = hour >= 20 || hour < 7;
-      const themeIcon = document.getElementById('theme-toggle-icon');
-
-      if (document.documentElement.classList.contains('dark')) {
-        themeIcon.className = "fa-solid fa-sun";
+      const isNight = hour >= 21 || hour < 6;
+      if (isNight) {
+        document.documentElement.classList.add('dark');
       } else {
-        themeIcon.className = "fa-solid fa-moon";
+        document.documentElement.classList.remove('dark');
       }
+    }
 
-      if (isDarkModeAuto) {
-        if (isNight) {
-          document.documentElement.classList.add('dark');
-          themeIcon.className = "fa-solid fa-sun";
+    // --- NAVIGATION ET VUES ---
+    function switchView(view) {
+      currentView = view;
+      ['dashboard', 'calendar', 'menu', 'shopping', 'tasks'].forEach(v => {
+        const el = document.getElementById(`view-${v}`);
+        const nav = document.getElementById(`nav-${v}`);
+        if (v === view) {
+          el.classList.remove('hidden');
+          nav.className = "px-3 py-2 rounded-lg text-sm font-medium transition-colors bg-indigo-50 text-indigo-600 dark:bg-indigo-950/50 dark:text-indigo-400 flex items-center gap-2";
         } else {
-          document.documentElement.classList.remove('dark');
-          themeIcon.className = "fa-solid fa-moon";
-        }
-      }
-    }
-
-    function toggleDarkModeManual() {
-      isDarkModeAuto = false;
-      document.documentElement.classList.toggle('dark');
-      const themeIcon = document.getElementById('theme-toggle-icon');
-      themeIcon.className = document.documentElement.classList.contains('dark') ? "fa-solid fa-sun" : "fa-solid fa-moon";
-    }
-
-    // --- NAVIGATION ONGLETS ---
-    function switchTab(tab) {
-      const tabs = ['dashboard', 'agenda', 'menu', 'shopping', 'tasks'];
-      tabs.forEach(t => {
-        document.getElementById(`view-${t}`).classList.add('hidden');
-        const btn = document.getElementById(`tab-btn-${t}`);
-        if(btn) btn.className = "px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center gap-1.5 shrink-0";
-      });
-
-      document.getElementById(`view-${tab}`).classList.remove('hidden');
-      const activeBtn = document.getElementById(`tab-btn-${tab}`);
-      
-      const activeColors = {
-        dashboard: 'text-indigo-600 dark:text-indigo-400',
-        agenda: 'text-indigo-600 dark:text-indigo-400',
-        menu: 'text-amber-600 dark:text-amber-400',
-        shopping: 'text-emerald-600 dark:text-emerald-400',
-        tasks: 'text-sky-600 dark:text-sky-400'
-      };
-      if(activeBtn) activeBtn.className = `px-3 py-1.5 rounded-lg bg-white dark:bg-slate-800 ${activeColors[tab]} shadow-sm transition flex items-center gap-1.5 shrink-0`;
-
-      if (tab === 'dashboard') loadDashboardData();
-      if (tab === 'agenda') render();
-      if (tab === 'shopping') renderShoppingList();
-      if (tab === 'tasks') renderTasksList();
-      if (tab === 'menu') renderMenuList();
-    }
-
-    // --- MODULE COURSES ---
-    let shoppingItems = JSON.parse(localStorage.getItem('fw_shopping_items')) || [];
-
-    function renderShoppingList() {
-      const container = document.getElementById('shopping-list-container');
-      const countEl = document.getElementById('shopping-count');
-      container.innerHTML = '';
-
-      const remaining = shoppingItems.filter(i => !i.completed).length;
-      countEl.textContent = `${remaining} article${remaining > 1 ? 's' : ''} à acheter`;
-
-      if (shoppingItems.length === 0) {
-        container.innerHTML = `
-          <div class="p-8 text-center text-slate-400">
-            <i class="fa-solid fa-basket-shopping text-4xl mb-2 opacity-50"></i>
-            <p class="text-sm font-medium">Votre liste de courses est vide.</p>
-          </div>
-        `;
-        return;
-      }
-
-      const sorted = [...shoppingItems].sort((a, b) => a.completed - b.completed);
-
-      sorted.forEach(item => {
-        const row = document.createElement('div');
-        row.className = `flex items-center justify-between p-3 rounded-xl border transition ${
-          item.completed ? 'bg-slate-50 dark:bg-slate-900/40 border-slate-100 dark:border-slate-800 opacity-60' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-emerald-300'
-        }`;
-
-        row.innerHTML = `
-          <label class="flex items-center gap-3 flex-1 cursor-pointer select-none">
-            <input type="checkbox" ${item.completed ? 'checked' : ''} onchange="toggleShoppingItem(${item.id})" 
-                   class="w-5 h-5 accent-emerald-600 rounded cursor-pointer">
-            <span class="text-sm font-medium ${item.completed ? 'line-through text-slate-400' : 'text-slate-800 dark:text-slate-100'}">${item.text}</span>
-          </label>
-          <button onclick="deleteShoppingItem(${item.id})" class="text-slate-300 hover:text-rose-500 p-1 text-xs transition">
-            <i class="fa-solid fa-xmark text-sm"></i>
-          </button>
-        `;
-        container.appendChild(row);
-      });
-    }
-
-    function addShoppingItem() {
-      const input = document.getElementById('shopping-input');
-      const text = input.value.trim();
-      if (!text) return;
-
-      shoppingItems.push({ id: Date.now(), text, completed: false });
-      localStorage.setItem('fw_shopping_items', JSON.stringify(shoppingItems));
-      input.value = '';
-      renderShoppingList();
-    }
-
-    function toggleShoppingItem(id) {
-      const item = shoppingItems.find(i => i.id === id);
-      if (item) {
-        item.completed = !item.completed;
-        localStorage.setItem('fw_shopping_items', JSON.stringify(shoppingItems));
-        renderShoppingList();
-      }
-    }
-
-    function deleteShoppingItem(id) {
-      shoppingItems = shoppingItems.filter(i => i.id !== id);
-      localStorage.setItem('fw_shopping_items', JSON.stringify(shoppingItems));
-      renderShoppingList();
-    }
-
-    function clearCompletedShopping() {
-      shoppingItems = shoppingItems.filter(i => !i.completed);
-      localStorage.setItem('fw_shopping_items', JSON.stringify(shoppingItems));
-      renderShoppingList();
-    }
-
-    // --- MODULE TÂCHES ---
-    function getTodayString() {
-      const today = new Date();
-      const year = today.getFullYear();
-      const month = String(today.getMonth() + 1).padStart(2, '0');
-      const day = String(today.getDate()).padStart(2, '0');
-      return `${year}-${month}-${day}`;
-    }
-
-    const initialToday = getTodayString();
-    const initialTasks = [
-      { id: 101, title: "Changer la nappe du gimbal sur le DJI Mini 2", date: initialToday, repeat: "none", completed: false },
-      { id: 102, title: "Vérifier le câble SATA interne du MacBook Pro 2012", date: initialToday, repeat: "none", completed: false },
-      { id: 103, title: "Contrôler le clip d'alimentation du volet solaire Somfy", date: initialToday, repeat: "none", completed: false },
-      { id: 104, title: "Vérifier le joint de chasse SIAMP Optima 49", date: initialToday, repeat: "none", completed: false },
-      { id: 105, title: "Contrôle des codes OBD et entretien du Renault Espace 5", date: initialToday, repeat: "none", completed: false },
-      { id: 106, title: "Finaliser les supports de formation NexSIS 18-112 (modules CTA/CODIS)", date: initialToday, repeat: "none", completed: false }
-    ];
-
-    let taskItems = JSON.parse(localStorage.getItem('my_tasks')) || JSON.parse(localStorage.getItem('fw_tasks_items')) || initialTasks;
-
-    function shouldShowToday(task, todayStr) {
-      const today = new Date(todayStr);
-      const taskDate = new Date(task.date);
-
-      if (taskDate > today) return false;
-      if (task.date === todayStr) return true;
-
-      switch (task.repeat) {
-        case 'daily':
-          return true;
-        case 'weekly':
-          return taskDate.getDay() === today.getDay();
-        case 'monthly':
-          return taskDate.getDate() === today.getDate();
-        default:
-          return false;
-      }
-    }
-
-    function renderTasksList() {
-      const container = document.getElementById('tasks-list-container');
-      const countEl = document.getElementById('tasks-count');
-      container.innerHTML = '';
-
-      const todayStr = getTodayString();
-      const todaysTasks = taskItems.filter(task => shouldShowToday(task, todayStr));
-      const remaining = todaysTasks.filter(i => !i.completed).length;
-      
-      countEl.textContent = `${remaining} tâche${remaining > 1 ? 's' : ''} prévue${remaining > 1 ? 's' : ''} aujourd'hui`;
-
-      if (todaysTasks.length === 0) {
-        container.innerHTML = `
-          <div class="p-8 text-center text-slate-400">
-            <i class="fa-solid fa-check-double text-4xl mb-2 opacity-50"></i>
-            <p class="text-sm font-medium">Aucune tâche prévue aujourd'hui.</p>
-          </div>
-        `;
-        return;
-      }
-
-      const sorted = [...todaysTasks].sort((a, b) => a.completed - b.completed);
-
-      sorted.forEach(item => {
-        const row = document.createElement('div');
-        row.className = `flex items-center justify-between p-3 rounded-xl border transition ${
-          item.completed ? 'bg-slate-50 dark:bg-slate-900/40 border-slate-100 dark:border-slate-800 opacity-60' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-sky-300'
-        }`;
-
-        const repeatBadge = item.repeat && item.repeat !== 'none' 
-          ? `<span class="text-[10px] font-semibold bg-sky-100 text-sky-700 dark:bg-sky-900/60 dark:text-sky-300 px-2 py-0.5 rounded-full ml-2">(${item.repeat})</span>`
-          : '';
-
-        row.innerHTML = `
-          <label class="flex items-center gap-3 flex-1 cursor-pointer select-none">
-            <input type="checkbox" ${item.completed ? 'checked' : ''} onchange="toggleTaskItem(${item.id})" 
-                   class="w-5 h-5 accent-sky-600 rounded cursor-pointer">
-            <span class="text-sm font-medium ${item.completed ? 'line-through text-slate-400' : 'text-slate-800 dark:text-slate-100'}">${item.title || item.text}</span>
-            ${repeatBadge}
-          </label>
-          <button onclick="deleteTaskItem(${item.id})" class="text-slate-300 hover:text-rose-500 p-1 text-xs transition">
-            <i class="fa-solid fa-xmark text-sm"></i>
-          </button>
-        `;
-        container.appendChild(row);
-      });
-    }
-
-    function addTaskItem(e) {
-      if (e) e.preventDefault();
-
-      const titleInput = document.getElementById('taskTitle');
-      const dateInput = document.getElementById('taskDate');
-      const repeatInput = document.getElementById('taskRepeat');
-
-      const title = titleInput.value.trim();
-      const date = dateInput.value || getTodayString();
-      const repeat = repeatInput.value;
-
-      if (!title) return;
-
-      const newTask = {
-        id: Date.now(),
-        title,
-        date,
-        repeat,
-        completed: false
-      };
-
-      taskItems.push(newTask);
-      localStorage.setItem('my_tasks', JSON.stringify(taskItems));
-      localStorage.setItem('fw_tasks_items', JSON.stringify(taskItems));
-      
-      document.getElementById('taskForm').reset();
-      document.getElementById('taskDate').value = getTodayString();
-      renderTasksList();
-      loadDashboardData();
-    }
-
-    function toggleTaskItem(id) {
-      const item = taskItems.find(i => i.id === id);
-      if (item) {
-        item.completed = !item.completed;
-        localStorage.setItem('my_tasks', JSON.stringify(taskItems));
-        localStorage.setItem('fw_tasks_items', JSON.stringify(taskItems));
-        renderTasksList();
-        loadDashboardData();
-      }
-    }
-
-    function deleteTaskItem(id) {
-      taskItems = taskItems.filter(i => i.id !== id);
-      localStorage.setItem('my_tasks', JSON.stringify(taskItems));
-      localStorage.setItem('fw_tasks_items', JSON.stringify(taskItems));
-      renderTasksList();
-      loadDashboardData();
-    }
-
-    function clearCompletedTasks() {
-      taskItems = taskItems.filter(i => !i.completed);
-      localStorage.setItem('my_tasks', JSON.stringify(taskItems));
-      localStorage.setItem('fw_tasks_items', JSON.stringify(taskItems));
-      renderTasksList();
-      loadDashboardData();
-    }
-
-    // --- MODULE MENUS ---
-    let menuData = JSON.parse(localStorage.getItem('fw_menu_data')) || {};
-    let mealBank = JSON.parse(localStorage.getItem('fw_meal_bank')) || {};
-
-    let menuCurrentWeekDate = new Date();
-
-    function navigateMenuWeek(delta) {
-      menuCurrentWeekDate.setDate(menuCurrentWeekDate.getDate() + (delta * 7));
-      renderMenuList();
-    }
-
-    function updateMealCountDisplays() {
-        const bankKeys = Object.keys(mealBank);
-        const count = bankKeys.length;
-        const recordedStr = `${count} enregistrés`;
-        document.getElementById('meal-bank-count').textContent = recordedStr;
-        document.getElementById('dash-meal-db-link').textContent = `Gérer la base de données (${recordedStr})`;
-    }
-
-    function renderMenuList() {
-      const container = document.getElementById('menu-days-container');
-      container.innerHTML = '';
-
-      const monday = getMonday(menuCurrentWeekDate);
-      const days = [];
-      for (let i = 0; i < 7; i++) {
-        const d = new Date(monday);
-        d.setDate(monday.getDate() + i);
-        days.push(d);
-      }
-
-      const sunday = days[6];
-      document.getElementById('menu-week-title').textContent = `Semaine du ${monday.getDate()} ${monday.toLocaleDateString('fr-FR', {month:'short'})} au ${sunday.getDate()} ${sunday.toLocaleDateString('fr-FR', {month:'short', year:'numeric'})}`;
-
-      updateMealCountDisplays();
-
-      const todayStr = formatDateISO(new Date());
-
-      days.forEach(d => {
-        const dateStr = formatDateISO(d);
-        const dayName = d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'short' });
-        const dayMenu = menuData[dateStr] || { lunch: '', dinner: '' };
-        const isToday = dateStr === todayStr;
-
-        const row = document.createElement('div');
-        row.className = `p-3.5 rounded-xl border transition ${
-          isToday ? 'bg-amber-50/50 dark:bg-amber-950/20 border-amber-300 dark:border-amber-700/50' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700'
-        }`;
-
-        row.innerHTML = `
-          <div class="font-bold text-xs capitalize mb-2 flex items-center justify-between ${isToday ? 'text-amber-700 dark:text-amber-400' : 'text-slate-700 dark:text-slate-300'}">
-            <span>${dayName} ${isToday ? '(Aujourd\'hui)' : ''}</span>
-          </div>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <span class="text-[10px] uppercase font-bold text-slate-400">Midi</span>
-              <div class="relative mt-0.5">
-                <input type="text" id="input-${dateStr}-lunch" value="${dayMenu.lunch || ''}" placeholder="Taper un repas..." 
-                       list="datalist-meals"
-                       onfocus="this.select()"
-                       onchange="saveMenuItem('${dateStr}', 'lunch', this.value)"
-                       class="w-full p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs outline-none focus:ring-1 focus:ring-amber-500">
-              </div>
-            </div>
-            <div>
-              <span class="text-[10px] uppercase font-bold text-slate-400">Soir</span>
-              <div class="relative mt-0.5">
-                <input type="text" id="input-${dateStr}-dinner" value="${dayMenu.dinner || ''}" placeholder="Taper un repas..." 
-                       list="datalist-meals"
-                       onfocus="this.select()"
-                       onchange="saveMenuItem('${dateStr}', 'dinner', this.value)"
-                       class="w-full p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs outline-none focus:ring-1 focus:ring-amber-500">
-              </div>
-            </div>
-          </div>
-        `;
-        container.appendChild(row);
-      });
-
-      updateDatalistSuggestions();
-      updateNextMealCard();
-    }
-
-    function updateDatalistSuggestions() {
-      let datalist = document.getElementById('datalist-meals');
-      if (!datalist) {
-        datalist = document.createElement('datalist');
-        datalist.id = 'datalist-meals';
-        document.body.appendChild(datalist);
-      }
-      datalist.innerHTML = '';
-
-      const sortedMeals = Object.keys(mealBank).sort((a, b) => new Date(mealBank[a]) - new Date(mealBank[b]));
-
-      sortedMeals.forEach(meal => {
-        const option = document.createElement('option');
-        option.value = meal;
-        datalist.appendChild(option);
-      });
-    }
-
-    function proposerRepasAncien() {
-      const box = document.getElementById('suggestion-box');
-      const keys = Object.keys(mealBank);
-
-      if (keys.length === 0) {
-        box.textContent = "Aucun repas enregistré pour le moment.";
-        box.classList.remove('hidden');
-        return;
-      }
-
-      const sortedMeals = keys.sort((a, b) => new Date(mealBank[a]) - new Date(mealBank[b]));
-      const poolSize = Math.max(1, Math.floor(sortedMeals.length / 3));
-      const randomIndex = Math.floor(Math.random() * poolSize);
-      const platChoisi = sortedMeals[randomIndex];
-
-      box.textContent = `Idée repas : ${platChoisi}`;
-      box.classList.remove('hidden');
-    }
-
-    function saveMenuItem(dateStr, mealType, value) {
-      const trimmed = value.trim();
-      if (!menuData[dateStr]) menuData[dateStr] = { lunch: '', dinner: '' };
-      
-      const previousValue = menuData[dateStr][mealType];
-      if (previousValue === trimmed) return;
-
-      menuData[dateStr][mealType] = trimmed;
-      localStorage.setItem('fw_menu_data', JSON.stringify(menuData));
-
-      if (trimmed !== '') {
-        mealBank[trimmed] = dateStr;
-        localStorage.setItem('fw_meal_bank', JSON.stringify(mealBank));
-        updateDatalistSuggestions();
-        updateMealCountDisplays();
-      }
-
-      updateNextMealCard();
-    }
-
-    function updateNextMealCard() {
-      const now = new Date();
-      const todayStr = formatDateISO(now);
-      const currentHour = now.getHours();
-      
-      const todayMenu = menuData[todayStr] || { lunch: '', dinner: '' };
-      
-      const titleEl = document.getElementById('next-meal-title');
-      const descEl = document.getElementById('next-meal-desc');
-
-      if (currentHour < 14) {
-        titleEl.textContent = "Déjeuner (Aujourd'hui)";
-        descEl.textContent = todayMenu.lunch || "Aucun menu renseigné";
-      } else if (currentHour < 21) {
-        titleEl.textContent = "Dîner (Ce soir)";
-        descEl.textContent = todayMenu.dinner || "Aucun menu renseigné";
-      } else {
-        const tomorrow = new Date(now);
-        tomorrow.setDate(now.getDate() + 1);
-        const tomorrowStr = formatDateISO(tomorrow);
-        const tomorrowMenu = menuData[tomorrowStr] || { lunch: '', dinner: '' };
-        
-        titleEl.textContent = "Déjeuner (Demain)";
-        descEl.textContent = tomorrowMenu.lunch || "Aucun menu renseigné";
-      }
-    }
-
-    // --- MODALE PLANIFICATEUR EXTENSIF ---
-    function openPlannerModal() {
-      document.getElementById('planner-start-date').value = formatDateISO(new Date());
-      generatePlannerRows();
-      document.getElementById('planner-modal').classList.remove('hidden');
-      document.getElementById('planner-modal').classList.add('flex');
-    }
-
-    function closePlannerModal() {
-      document.getElementById('planner-modal').classList.add('hidden');
-      document.getElementById('planner-modal').classList.remove('flex');
-    }
-
-    function generatePlannerRows() {
-      const startDateVal = document.getElementById('planner-start-date').value;
-      const count = parseInt(document.getElementById('planner-days-count').value) || 7;
-      const container = document.getElementById('planner-rows-container');
-      container.innerHTML = '';
-
-      if (!startDateVal) return;
-
-      const startDate = new Date(startDateVal);
-      const oldestMeals = Object.keys(mealBank).sort((a, b) => new Date(mealBank[a]) - new Date(mealBank[b])).slice(0, 6);
-
-      let suggestionsHtml = '';
-      if (oldestMeals.length > 0) {
-        suggestionsHtml = `
-          <div class="p-2.5 bg-amber-50 dark:bg-amber-950/30 rounded-xl border border-amber-200 dark:border-amber-900/50 mb-3">
-            <span class="text-[11px] font-bold text-amber-800 dark:text-amber-300 block mb-1.5"><i class="fa-solid fa-clock-rotate-left mr-1"></i> Suggestions : Plats les plus anciens</span>
-            <div class="flex flex-wrap gap-1">
-        `;
-        oldestMeals.forEach(m => {
-          suggestionsHtml += `<span class="px-2 py-0.5 bg-white dark:bg-slate-800 border border-amber-200 dark:border-amber-800 rounded-lg text-[10px] font-semibold text-slate-700 dark:text-slate-300 shadow-2xs">${m}</span>`;
-        });
-        suggestionsHtml += `</div></div>`;
-      }
-
-      container.innerHTML = suggestionsHtml;
-
-      for (let i = 0; i < count; i++) {
-        const d = new Date(startDate);
-        d.setDate(startDate.getDate() + i);
-        const dateStr = formatDateISO(d);
-        const dayLabel = d.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' });
-        const existing = menuData[dateStr] || { lunch: '', dinner: '' };
-
-        const row = document.createElement('div');
-        row.className = "p-2.5 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 grid grid-cols-1 sm:grid-cols-7 gap-2 items-center";
-
-        row.innerHTML = `
-          <div class="sm:col-span-2 font-bold text-xs capitalize text-slate-700 dark:text-slate-300">${dayLabel}</div>
-          <div class="sm:col-span-2">
-            <input type="text" data-date="${dateStr}" data-type="lunch" value="${existing.lunch || ''}" placeholder="Midi..." list="datalist-meals" onfocus="this.select()" class="planner-field w-full p-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs outline-none focus:ring-1 focus:ring-amber-500">
-          </div>
-          <div class="sm:col-span-3">
-            <input type="text" data-date="${dateStr}" data-type="dinner" value="${existing.dinner || ''}" placeholder="Soir..." list="datalist-meals" onfocus="this.select()" class="planner-field w-full p-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs outline-none focus:ring-1 focus:ring-amber-500">
-          </div>
-        `;
-        container.appendChild(row);
-      }
-    }
-
-    function savePlannerSession() {
-      const fields = document.querySelectorAll('.planner-field');
-      fields.forEach(field => {
-        const dateStr = field.getAttribute('data-date');
-        const type = field.getAttribute('data-type');
-        const val = field.value.trim();
-
-        if (!menuData[dateStr]) menuData[dateStr] = { lunch: '', dinner: '' };
-        if (menuData[dateStr][type] === val) return;
-
-        menuData[dateStr][type] = val;
-
-        if (val !== '') {
-          mealBank[val] = dateStr;
+          el.classList.add('hidden');
+          nav.className = "px-3 py-2 rounded-lg text-sm font-medium transition-colors text-slate-600 hover:text-indigo-600 dark:text-slate-300 dark:hover:text-white flex items-center gap-2";
         }
       });
 
-      localStorage.setItem('fw_menu_data', JSON.stringify(menuData));
-      localStorage.setItem('fw_meal_bank', JSON.stringify(mealBank));
-      
-      updateDatalistSuggestions();
-      updateMealCountDisplays();
-      
-      if (currentView === 'menu') renderMenuList();
-      if (currentView === 'dashboard') loadDashboardData();
-      
-      closePlannerModal();
+      if (view === 'dashboard') loadDashboardData();
+      if (view === 'calendar') render();
+      if (view === 'menu') renderMenuList();
     }
 
-    // --- MEAL DATABASE MANAGER ---
-    function openDatabaseModal() {
-        renderDatabaseList();
-        document.getElementById('db-modal').classList.remove('hidden');
-        document.getElementById('db-modal').classList.add('flex');
+    function setCalendarMode(mode) {
+      calendarMode = mode;
+      document.getElementById('mode-week-btn').className = mode === 'week' ? 'px-3 py-1 text-xs font-semibold rounded-md bg-white dark:bg-slate-800 shadow-sm' : 'px-3 py-1 text-xs font-semibold rounded-md text-slate-500 hover:text-slate-900 dark:hover:text-white';
+      document.getElementById('mode-month-btn').className = mode === 'month' ? 'px-3 py-1 text-xs font-semibold rounded-md bg-white dark:bg-slate-800 shadow-sm' : 'px-3 py-1 text-xs font-semibold rounded-md text-slate-500 hover:text-slate-900 dark:hover:text-white';
+      render();
     }
 
-    function closeDatabaseModal() {
-        document.getElementById('db-modal').classList.add('hidden');
-        document.getElementById('db-modal').classList.remove('flex');
-    }
-
-    function renderDatabaseList() {
-        const container = document.getElementById('db-meal-list');
-        container.innerHTML = '';
-        const meals = Object.keys(mealBank).sort((a, b) => a.localeCompare(b));
-
-        if (meals.length === 0) {
-            container.innerHTML = `<div class="p-8 text-center text-slate-400 text-sm">Base de données vide. Planifiez des repas pour la remplir.</div>`;
-            return;
-        }
-
-        meals.forEach(meal => {
-            const row = document.createElement('div');
-            row.className = "flex items-center gap-2 p-1 bg-slate-50 dark:bg-slate-900/50 rounded-lg border border-slate-100 dark:border-slate-700/50";
-            row.innerHTML = `
-                <input type="text" value="${meal}" onfocus="this.select()" onchange="renameMeal(this, '${meal}')" class="flex-1 p-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs outline-none focus:ring-1 focus:ring-indigo-500">
-                <button onclick="deleteMealFromBank('${meal}')" class="p-1.5 text-slate-400 hover:text-rose-600 transition" title="Supprimer définitivement"><i class="fa-solid fa-trash-can"></i></button>
-            `;
-            container.appendChild(row);
-        });
-    }
-
-    function renameMeal(input, oldMealName) {
-        const newMealName = input.value.trim();
-        if (!newMealName || newMealName === oldMealName) {
-            input.value = oldMealName;
-            return;
-        }
-
-        const date = mealBank[oldMealName];
-        delete mealBank[oldMealName];
-        mealBank[newMealName] = date;
-        
-        localStorage.setItem('fw_meal_bank', JSON.stringify(mealBank));
-        renderDatabaseList();
-        updateMealCountDisplays();
-        updateDatalistSuggestions();
-    }
-
-    function deleteMealFromBank(mealName) {
-        if (!confirm(`Voulez-vous vraiment supprimer "${mealName}" ? Il ne sera plus suggéré.`)) return;
-        delete mealBank[mealName];
-        localStorage.setItem('fw_meal_bank', JSON.stringify(mealBank));
-        renderDatabaseList();
-        updateMealCountDisplays();
-        updateDatalistSuggestions();
-    }
-
-    // --- AGENDA STATE ET CALENDRIER ---
-    let currentDate = new Date();
-    let currentView = 'week';
-    let events = JSON.parse(localStorage.getItem('fw_week_events')) || [];
-
-    const COLOR_PALETTE = [
-      { name: 'Bleu foncé', class: 'bg-indigo-600 border-indigo-700', sampleBg: 'bg-indigo-600' },
-      { name: 'Bleu ciel', class: 'bg-sky-500 border-sky-600', sampleBg: 'bg-sky-500' },
-      { name: 'Cyan / Bleu nuit', class: 'bg-cyan-600 border-cyan-700', sampleBg: 'bg-cyan-600' },
-      { name: 'Vert Émeraude', class: 'bg-emerald-500 border-emerald-600', sampleBg: 'bg-emerald-500' },
-      { name: 'Vert Olive / Lime', class: 'bg-lime-600 border-lime-700', sampleBg: 'bg-lime-600' },
-      { name: 'Jaune Ambre', class: 'bg-amber-500 border-amber-600', sampleBg: 'bg-amber-500' },
-      { name: 'Orange', class: 'bg-orange-500 border-orange-600', sampleBg: 'bg-orange-500' },
-      { name: 'Rouge / Rose', class: 'bg-rose-500 border-rose-600', sampleBg: 'bg-rose-500' },
-      { name: 'Violet / Nuit', class: 'bg-purple-600 border-purple-700', sampleBg: 'bg-purple-600' },
-      { name: 'Fuchsia', class: 'bg-fuchsia-600 border-fuchsia-700', sampleBg: 'bg-fuchsia-600' },
-      { name: 'Marron / Terre', class: 'bg-stone-600 border-stone-700', sampleBg: 'bg-stone-600' },
-      { name: 'Gris Ardoise', class: 'bg-slate-600 border-slate-700', sampleBg: 'bg-slate-600' }
-    ];
-
-    let presets = JSON.parse(localStorage.getItem('fw_event_presets')) || [
-      { id: 1, title: 'Garde Jour', start: '07:00', end: '19:00', color: 'bg-indigo-600 border-indigo-700' },
-      { id: 2, title: 'Garde Nuit', start: '19:00', end: '23:00', color: 'bg-purple-600 border-purple-700' },
-      { id: 3, title: 'Enfants', start: '08:00', end: '18:00', color: 'bg-emerald-500 border-emerald-600' }
-    ];
-
-    const START_HOUR = 6;
-    const END_HOUR = 23;
-    const TOTAL_HOURS = END_HOUR - START_HOUR + 1;
-
-    function getMonday(d) {
+    // --- GESTION DES DATES ---
+    function getStartOfWeek(d) {
       const date = new Date(d);
       const day = date.getDay();
       const diff = date.getDate() - day + (day === 0 ? -6 : 1);
@@ -1141,149 +348,15 @@
     }
 
     function formatDateISO(d) {
-      const year = d.getFullYear();
-      const month = String(d.getMonth() + 1).padStart(2, '0');
-      const day = String(d.getDate()).padStart(2, '0');
-      return `${year}-${month}-${day}`;
+      return d.toISOString().split('T')[0];
     }
 
-    function toggleAllDayFields() {
-      const isAllDay = document.getElementById('event-allday-input').checked;
-      const container = document.getElementById('time-inputs-container');
-      if (isAllDay) {
-        container.classList.add('hidden');
-        document.getElementById('event-start-input').value = "06:00";
-        document.getElementById('event-end-input').value = "23:59";
+    function changeWeek(offset) {
+      if (calendarMode === 'week') {
+        currentDate.setDate(currentDate.getDate() + (offset * 7));
       } else {
-        container.classList.remove('hidden');
+        currentDate.setMonth(currentDate.getMonth() + offset);
       }
-    }
-
-    function loadDashboardData() {
-      const today = new Date();
-      const todayStr = formatDateISO(today);
-
-      document.getElementById('dash-date-txt').textContent = today.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-
-      // Charger les événements
-      const todayEvents = events.filter(e => e.date === todayStr).sort((a,b) => a.start.localeCompare(b.start));
-      const container = document.getElementById('dash-today-events');
-      const badge = document.getElementById('dash-event-badge');
-
-      badge.textContent = `${todayEvents.length} événement${todayEvents.length > 1 ? 's' : ''}`;
-
-      if (todayEvents.length === 0) {
-        container.innerHTML = `
-          <div class="p-5 text-center bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-dashed border-slate-200 dark:border-slate-700">
-            <i class="fa-solid fa-mug-hot text-slate-300 dark:text-slate-600 text-2xl mb-1"></i>
-            <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Rien de prévu aujourd'hui ! Profite de ta journée.</p>
-          </div>
-        `;
-      } else {
-        container.innerHTML = '';
-        todayEvents.forEach(e => {
-          const item = document.createElement('div');
-          item.className = `p-2.5 rounded-xl text-white ${e.color || 'bg-indigo-600 border-indigo-700'} shadow-sm flex items-center justify-between`;
-          
-          const timeDisplay = e.allDay ? 'Journée entière' : `${e.start} - ${e.end}`;
-
-          item.innerHTML = `
-            <div class="flex items-center gap-2.5">
-              <div class="text-[11px] font-bold bg-black/20 px-2 py-0.5 rounded-md shrink-0">
-                ${timeDisplay}
-              </div>
-              <span class="font-semibold text-xs sm:text-sm truncate">${e.title}</span>
-            </div>
-            <button onclick="switchTab('agenda')" class="text-white/80 hover:text-white text-xs"><i class="fa-solid fa-chevron-right"></i></button>
-          `;
-          container.appendChild(item);
-        });
-      }
-
-      // Charger les tâches du jour
-      const todayTasks = taskItems.filter(task => shouldShowToday(task, todayStr));
-      const remainingTasks = todayTasks.filter(i => !i.completed);
-      const tasksContainer = document.getElementById('dash-today-tasks');
-      const tasksBadge = document.getElementById('dash-task-badge');
-
-      tasksBadge.textContent = `${remainingTasks.length} à faire`;
-
-      if (todayTasks.length === 0) {
-        tasksContainer.innerHTML = `
-          <div class="p-5 text-center bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-dashed border-slate-200 dark:border-slate-700">
-            <i class="fa-solid fa-check-circle text-slate-300 dark:text-slate-600 text-2xl mb-1"></i>
-            <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Aucune tâche prévue aujourd'hui !</p>
-          </div>
-        `;
-      } else {
-        tasksContainer.innerHTML = '';
-        const sortedTasks = [...todayTasks].sort((a, b) => a.completed - b.completed).slice(0, 4);
-        
-        sortedTasks.forEach(item => {
-          const row = document.createElement('div');
-          row.className = `flex items-center justify-between p-2 rounded-xl border transition ${
-            item.completed ? 'bg-slate-50 dark:bg-slate-900/40 border-slate-100 dark:border-slate-800 opacity-60' : 'bg-slate-50 dark:bg-slate-900/80 border-slate-200 dark:border-slate-700'
-          }`;
-
-          row.innerHTML = `
-            <label class="flex items-center gap-2 flex-1 cursor-pointer select-none truncate">
-              <input type="checkbox" ${item.completed ? 'checked' : ''} onchange="toggleTaskItem(${item.id})" 
-                     class="w-4 h-4 accent-sky-600 rounded cursor-pointer shrink-0">
-              <span class="text-xs font-semibold truncate ${item.completed ? 'line-through text-slate-400' : 'text-slate-800 dark:text-slate-100'}">${item.title || item.text}</span>
-            </label>
-          `;
-          tasksContainer.appendChild(row);
-        });
-      }
-
-      // Charger les repas
-      const menus = JSON.parse(localStorage.getItem('fw_menu_data')) || {};
-      if (menus[todayStr]) {
-        document.getElementById('dash-lunch-preview').textContent = menus[todayStr].lunch || "Non défini";
-        document.getElementById('dash-dinner-preview').textContent = menus[todayStr].dinner || "Non défini";
-      } else {
-        document.getElementById('dash-lunch-preview').textContent = "Non défini";
-        document.getElementById('dash-dinner-preview').textContent = "Non défini";
-      }
-
-      updateMealCountDisplays();
-    }
-
-    function renderColorPicker(selectedClass) {
-      const container = document.getElementById('color-picker-container');
-      container.innerHTML = '';
-      COLOR_PALETTE.forEach(c => {
-        const btn = document.createElement('div');
-        const isSelected = c.class === selectedClass;
-        btn.className = `h-7 w-full rounded-lg ${c.sampleBg} cursor-pointer transition flex items-center justify-center border-2 ${isSelected ? 'border-white ring-2 ring-indigo-600 scale-105 shadow' : 'border-transparent opacity-80 hover:opacity-100'}`;
-        btn.title = c.name;
-        btn.onclick = () => selectColor(c.class);
-        if (isSelected) btn.innerHTML = `<i class="fa-solid fa-check text-white text-xs"></i>`;
-        container.appendChild(btn);
-      });
-    }
-
-    function selectColor(colorClass) {
-      document.getElementById('event-color-input').value = colorClass;
-      renderColorPicker(colorClass);
-    }
-
-    function setViewMode(mode) {
-      currentView = mode;
-      document.getElementById('btn-view-day').className = mode === 'day' ? "px-2.5 py-1 rounded-md bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm transition" : "px-2.5 py-1 rounded-md text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition";
-      document.getElementById('btn-view-week').className = mode === 'week' ? "px-2.5 py-1 rounded-md bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm transition" : "px-2.5 py-1 rounded-md text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition";
-      document.getElementById('btn-view-month').className = mode === 'month' ? "px-2.5 py-1 rounded-md bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm transition" : "px-2.5 py-1 rounded-md text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition";
-      
-      document.getElementById('day-view-container').classList.toggle('hidden', mode !== 'day');
-      document.getElementById('week-view-container').classList.toggle('hidden', mode !== 'week');
-      document.getElementById('month-view-container').classList.toggle('hidden', mode !== 'month');
-      render();
-    }
-
-    function navigatePeriod(delta) {
-      if (currentView === 'day') currentDate.setDate(currentDate.getDate() + delta);
-      else if (currentView === 'week') currentDate.setDate(currentDate.getDate() + (delta * 7));
-      else currentDate.setMonth(currentDate.getMonth() + delta);
       render();
     }
 
@@ -1292,445 +365,464 @@
       render();
     }
 
-    function render() {
-      if (currentView === 'day') renderDay();
-      else if (currentView === 'week') renderWeek();
-      else renderMonth();
-    }
+    // --- DASHBOARD ---
+    function loadDashboardData() {
+      const todayStr = formatDateISO(new Date());
+      const todayEvents = events.filter(e => e.date === todayStr);
+      document.getElementById('dash-today-events').textContent = `${todayEvents.length} événement(s)`;
 
-    function renderDay() {
-      const dateStr = formatDateISO(currentDate);
-      const isToday = dateStr === formatDateISO(new Date());
-      const dayName = currentDate.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+      const pendingTasks = tasksList.filter(t => !t.done).length;
+      document.getElementById('dash-pending-tasks').textContent = `${pendingTasks} restante(s)`;
 
-      document.getElementById('date-display').textContent = dayName;
+      const pendingShopping = shoppingList.filter(s => !s.done).length;
+      document.getElementById('dash-shopping-count').textContent = `${pendingShopping} article(s)`;
 
-      const header = document.getElementById('day-header');
-      header.innerHTML = `
-        <div class="p-2 border-r border-slate-200 dark:border-slate-700">Heure</div>
-        <div class="p-1.5 border-r border-slate-200 dark:border-slate-700 ${isToday ? 'bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 font-bold' : ''}">
-          <div class="uppercase text-[10px] tracking-wider text-slate-400">${currentDate.toLocaleDateString('fr-FR', { weekday: 'short' })}</div>
-          <div class="text-xs sm:text-sm">${currentDate.getDate()}</div>
-        </div>
-      `;
+      // Prochains événements
+      const upcomingContainer = document.getElementById('dash-upcoming-list');
+      upcomingContainer.innerHTML = '';
+      const sorted = [...events].sort((a,b) => a.date.localeCompare(b.date)).filter(e => e.date >= todayStr).slice(0, 5);
 
-      const grid = document.getElementById('day-grid');
-      grid.innerHTML = '';
-
-      for (let hour = START_HOUR; hour <= END_HOUR; hour++) {
-        const row = document.createElement('div');
-        row.className = 'grid grid-cols-[60px_1fr] flex-1 border-b border-slate-100 dark:border-slate-700/50 min-h-0';
-        const hourStr = `${String(hour).padStart(2, '0')}:00`;
-        row.innerHTML = `
-          <div class="p-0.5 text-center text-[11px] text-slate-400 border-r border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/30 flex items-center justify-center font-medium leading-none">${hourStr}</div>
-          <div onclick="openModalForDateAndHour('${dateStr}', '${hourStr}')" class="border-r border-slate-100 dark:border-slate-700/40 hover:bg-slate-50/80 dark:hover:bg-slate-700/30 transition cursor-pointer"></div>
-        `;
-        grid.appendChild(row);
+      if(sorted.length === 0) {
+        upcomingContainer.innerHTML = `<p class="text-slate-400 text-sm">Aucun événement prévu.</p>`;
+      } else {
+        sorted.forEach(e => {
+          upcomingContainer.innerHTML += `
+            <div class="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700/50 rounded-lg border-l-4 ${e.color || 'border-indigo-500'}">
+              <div>
+                <p class="font-bold text-sm">${e.title}</p>
+                <p class="text-xs text-slate-500">${e.date} ${e.allDay ? '(Journée entière)' : (e.start + ' - ' + e.end)}</p>
+              </div>
+            </div>
+          `;
+        });
       }
 
-      renderDayEventsLayer(currentDate);
+      // Repas du jour
+      const todayMealContainer = document.getElementById('dash-today-meals');
+      const todayMeal = menuList[todayStr] || { midi: '', soir: '' };
+      todayMealContainer.innerHTML = `
+        <div class="p-3 bg-slate-50 dark:bg-slate-700/50 rounded-lg space-y-1">
+          <p class="text-xs font-semibold uppercase text-indigo-500">Midi</p>
+          <p class="text-sm font-medium">${todayMeal.midi || 'Non planifié'}</p>
+        </div>
+        <div class="p-3 bg-slate-50 dark:bg-slate-700/50 rounded-lg space-y-1">
+          <p class="text-xs font-semibold uppercase text-indigo-500">Soir</p>
+          <p class="text-sm font-medium">${todayMeal.soir || 'Non planifié'}</p>
+        </div>
+      `;
     }
 
-    function renderDayEventsLayer(d) {
-      const colDay = document.querySelector('.col-day-single');
-      if (!colDay) return;
-      colDay.innerHTML = '';
-
-      const dateStr = formatDateISO(d);
-      const dayEvents = events.filter(e => e.date === dateStr);
-      const processedEvents = computeOverlapLayout(dayEvents);
-
-      processedEvents.forEach(e => {
-        const [startH, startM] = e.start.split(':').map(Number);
-        const [endH, endM] = e.end.split(':').map(Number);
-
-        const startMinutes = (startH - START_HOUR) * 60 + startM;
-        const endMinutes = (endH - START_HOUR) * 60 + endM;
-        const totalMinutes = TOTAL_HOURS * 60;
-
-        const topPercent = (startMinutes / totalMinutes) * 100;
-        const heightPercent = Math.max(((endMinutes - startMinutes) / totalMinutes) * 100, 3.5);
-        const widthPercent = 100 / e.maxColumns;
-        const leftPercent = e.column * widthPercent;
-
-        const card = document.createElement('div');
-        card.className = `absolute ${e.color} text-white p-1.5 rounded-md shadow border-l-2 overflow-hidden flex flex-col justify-between cursor-pointer hover:opacity-95 transition z-10`;
-        card.style.top = `${topPercent}%`;
-        card.style.height = `${heightPercent}%`;
-        card.style.left = `${leftPercent}%`;
-        card.style.width = `${widthPercent}%`;
-
-        const timeLabel = e.allDay ? 'Journée entière' : `${e.start} - ${e.end}`;
-
-        card.innerHTML = `
-          <div class="flex justify-between items-start gap-1 leading-tight">
-            <div class="font-bold text-xs sm:text-sm truncate" onclick="editEvent(${e.id})">${e.title}</div>
-            <button onclick="event.stopPropagation(); deleteEventDirect(${e.id})" class="text-white/80 hover:text-white rounded text-xs" title="Supprimer">
-              <i class="fa-solid fa-xmark"></i>
-            </button>
-          </div>
-          <div class="text-[10px] sm:text-xs opacity-90 font-medium truncate" onclick="editEvent(${e.id})">${timeLabel}</div>
-        `;
-        colDay.appendChild(card);
-      });
+    // --- PLANNER / CALENDRIER ---
+    function render() {
+      if (calendarMode === 'week') {
+        renderWeekView();
+      } else {
+        renderMonthView();
+      }
     }
 
-    function renderWeek() {
-      const monday = getMonday(currentDate);
+    function renderWeekView() {
+      const startOfWeek = getStartOfWeek(currentDate);
       const days = [];
       for (let i = 0; i < 7; i++) {
-        const d = new Date(monday);
-        d.setDate(monday.getDate() + i);
+        const d = new Date(startOfWeek);
+        d.setDate(d.getDate() + i);
         days.push(d);
       }
 
-      const lastDay = days[6];
-      const monthFormat = days[0].getMonth() === lastDay.getMonth() 
-        ? days[0].toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
-        : `${days[0].toLocaleDateString('fr-FR', { month: 'short' })} - ${lastDay.toLocaleDateString('fr-FR', { month: 'short', year: 'numeric' })}`;
-      
-      document.getElementById('date-display').textContent = `Semaine du ${days[0].getDate()} au ${lastDay.getDate()} ${monthFormat}`;
+      // Titre de la semaine
+      const endOfWeek = days[6];
+      document.getElementById('current-week-title').textContent = 
+        `${startOfWeek.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })} - ${endOfWeek.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}`;
 
-      const header = document.getElementById('week-header');
-      const todayStr = formatDateISO(new Date());
-
-      let headerHtml = `<div class="p-2 border-r border-slate-200 dark:border-slate-700">Heure</div>`;
+      // En-tête du tableau
+      const header = document.getElementById('calendar-grid-header');
+      header.innerHTML = `<div class="py-1">Heure</div>`;
       days.forEach(d => {
-        const dateStr = formatDateISO(d);
-        const isToday = dateStr === todayStr;
-        const dayName = d.toLocaleDateString('fr-FR', { weekday: 'short' });
-        headerHtml += `
-          <div class="p-1.5 border-r border-slate-200 dark:border-slate-700 ${isToday ? 'bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 font-bold' : ''}">
-            <div class="uppercase text-[10px] tracking-wider text-slate-400">${dayName}</div>
-            <div class="text-xs sm:text-sm">${d.getDate()}</div>
+        const isToday = formatDateISO(d) === formatDateISO(new Date());
+        header.innerHTML += `
+          <div class="py-1 ${isToday ? 'text-indigo-600 dark:text-indigo-400 font-bold' : ''}">
+            ${d.toLocaleDateString('fr-FR', { weekday: 'short' })}<br>
+            <span class="text-sm">${d.getDate()}</span>
           </div>
         `;
       });
-      header.innerHTML = headerHtml;
 
-      const grid = document.getElementById('week-grid');
-      grid.innerHTML = '';
+      // Corps du tableau (00h - 23h)
+      const body = document.getElementById('calendar-grid-body');
+      body.innerHTML = '';
 
-      for (let hour = START_HOUR; hour <= END_HOUR; hour++) {
-        const row = document.createElement('div');
-        row.className = 'grid grid-cols-[60px_repeat(7,1fr)] flex-1 border-b border-slate-100 dark:border-slate-700/50 min-h-0';
+      for (let hour = 0; hour < 24; hour++) {
         const hourStr = `${String(hour).padStart(2, '0')}:00`;
-        let rowHtml = `<div class="p-0.5 text-center text-[11px] text-slate-400 border-r border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/30 flex items-center justify-center font-medium leading-none">${hourStr}</div>`;
+        let rowHtml = `<div class="grid grid-cols-8 min-h-[48px] border-b border-slate-100 dark:border-slate-800">
+          <div class="text-[10px] text-slate-400 p-1 text-center border-r border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/30 font-mono">${hourStr}</div>`;
 
         days.forEach(d => {
           const dateStr = formatDateISO(d);
-          rowHtml += `<div onclick="openModalForDateAndHour('${dateStr}', '${hourStr}')" class="border-r border-slate-100 dark:border-slate-700/40 hover:bg-slate-50/80 dark:hover:bg-slate-700/30 transition cursor-pointer"></div>`;
+          const cellEvents = events.filter(e => {
+            if (e.date !== dateStr) return false;
+            if (e.allDay) return hour === 0;
+            if (!e.start) return false;
+            const startHour = parseInt(e.start.split(':')[0]);
+            return startHour === hour;
+          });
+
+          rowHtml += `
+            <div onclick="openModalForDateAndHour('${dateStr}', '${hourStr}')" class="p-1 border-r border-slate-200 dark:border-slate-700 hover:bg-indigo-50/30 dark:hover:bg-indigo-950/20 cursor-pointer transition-colors relative">
+          `;
+
+          cellEvents.forEach(e => {
+            rowHtml += `
+              <div onclick="event.stopPropagation(); editEvent(${e.id})" class="text-xs p-1.5 rounded text-white font-medium ${e.color || 'bg-indigo-600'} shadow-sm mb-1 truncate">
+                ${e.title}
+              </div>
+            `;
+          });
+
+          rowHtml += `</div>`;
         });
 
-        row.innerHTML = rowHtml;
-        grid.appendChild(row);
+        rowHtml += `</div>`;
+        body.innerHTML += rowHtml;
       }
-
-      renderEventsLayer(days);
     }
 
-    function renderEventsLayer(days) {
-      const colDays = document.querySelectorAll('.col-day');
-      colDays.forEach(c => c.innerHTML = '');
+    function renderMonthView() {
+      const year = currentDate.getFullYear();
+      const month = currentDate.getMonth();
+      const firstDay = new Date(year, month, 1);
+      const lastDay = new Date(year, month + 1, 0);
 
-      days.forEach((d, dayIndex) => {
+      document.getElementById('current-week-title').textContent = 
+        firstDay.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+
+      const header = document.getElementById('calendar-grid-header');
+      header.innerHTML = `
+        <div class="col-span-8 grid grid-cols-7 w-full">
+          <div>Lun</div><div>Mar</div><div>Mer</div><div>Jeu</div><div>Ven</div><div>Sam</div><div>Dim</div>
+        </div>
+      `;
+
+      const body = document.getElementById('calendar-grid-body');
+      body.innerHTML = '';
+
+      let gridHtml = `<div class="grid grid-cols-7 auto-rows-fr min-h-[500px]">`;
+
+      let startOffset = firstDay.getDay() - 1;
+      if (startOffset === -1) startOffset = 6;
+
+      for (let i = 0; i < startOffset; i++) {
+        gridHtml += `<div class="bg-slate-50/50 dark:bg-slate-800/20 border-b border-r border-slate-200 dark:border-slate-700 min-h-[80px]"></div>`;
+      }
+
+      for (let day = 1; day <= lastDay.getDate(); day++) {
+        const d = new Date(year, month, day);
         const dateStr = formatDateISO(d);
         const dayEvents = events.filter(e => e.date === dateStr);
-        const processedEvents = computeOverlapLayout(dayEvents);
+        const isToday = dateStr === formatDateISO(new Date());
 
-        processedEvents.forEach(e => {
-          const [startH, startM] = e.start.split(':').map(Number);
-          const [endH, endM] = e.end.split(':').map(Number);
+        gridHtml += `
+          <div onclick="openModalForDateAndHour('${dateStr}', '08:00')" class="p-1 border-b border-r border-slate-200 dark:border-slate-700 min-h-[80px] hover:bg-slate-50 dark:hover:bg-slate-700/30 cursor-pointer">
+            <div class="text-right text-xs font-semibold ${isToday ? 'text-indigo-600 dark:text-indigo-400 font-bold' : 'text-slate-400'}">${day}</div>
+            <div class="space-y-1 mt-1">
+        `;
 
-          const startMinutes = (startH - START_HOUR) * 60 + startM;
-          const endMinutes = (endH - START_HOUR) * 60 + endM;
-          const totalMinutes = TOTAL_HOURS * 60;
-
-          const topPercent = (startMinutes / totalMinutes) * 100;
-          const heightPercent = Math.max(((endMinutes - startMinutes) / totalMinutes) * 100, 3.5);
-          const widthPercent = 100 / e.maxColumns;
-          const leftPercent = e.column * widthPercent;
-
-          const card = document.createElement('div');
-          card.className = `absolute ${e.color} text-white p-1 rounded-md shadow border-l-2 overflow-hidden flex flex-col justify-between cursor-pointer hover:opacity-95 transition z-10`;
-          card.style.top = `${topPercent}%`;
-          card.style.height = `${heightPercent}%`;
-          card.style.left = `${leftPercent}%`;
-          card.style.width = `${widthPercent}%`;
-
-          const timeLabel = e.allDay ? 'Journée entière' : `${e.start} - ${e.end}`;
-
-          card.innerHTML = `
-            <div class="flex justify-between items-start gap-1 leading-tight">
-              <div class="font-bold text-[10px] sm:text-[11px] truncate" onclick="editEvent(${e.id})">${e.title}</div>
-              <button onclick="event.stopPropagation(); deleteEventDirect(${e.id})" class="text-white/80 hover:text-white rounded text-[10px]" title="Supprimer">
-                <i class="fa-solid fa-xmark"></i>
-              </button>
+        dayEvents.forEach(e => {
+          gridHtml += `
+            <div onclick="event.stopPropagation(); editEvent(${e.id})" class="text-[10px] p-1 rounded text-white truncate ${e.color || 'bg-indigo-600'}">
+              ${e.title}
             </div>
-            <div class="text-[9px] opacity-90 font-medium truncate" onclick="editEvent(${e.id})">${timeLabel}</div>
           `;
-          colDays[dayIndex].appendChild(card);
         });
+
+        gridHtml += `</div></div>`;
+      }
+
+      gridHtml += `</div>`;
+      body.innerHTML = gridHtml;
+    }
+
+    // --- PRESETS ---
+    function renderPresets() {
+      const container = document.getElementById('preset-buttons-bar');
+      container.innerHTML = `<span class="text-xs font-semibold text-slate-400 uppercase flex items-center mr-2">Accès rapide :</span>`;
+      PRESETS.forEach(p => {
+        container.innerHTML += `
+          <button onclick="applyPreset('${p.label}', '${p.color}', '${p.start || ''}', '${p.end || ''}', ${p.allDay || false}, ${p.span})" class="px-2.5 py-1 text-xs font-medium text-white rounded-md ${p.color} shadow-sm hover:opacity-90 transition-opacity">
+            + ${p.label}
+          </button>
+        `;
       });
     }
 
-    function renderMonth() {
+    function applyPreset(label, color, start, end, allDay, span) {
+      openModalForNewEvent();
+      document.getElementById('event-title-input').value = label;
+      document.getElementById('event-start-input').value = start || "08:00";
+      document.getElementById('event-end-input').value = end || "18:00";
+      document.getElementById('event-allday-input').checked = allDay;
+      document.getElementById('event-span-days').value = span || 1;
+      selectColor(color);
+      toggleAllDayFields();
+    }
+
+    // --- LISTE DE COURSES ---
+    function renderShoppingList() {
+      const ul = document.getElementById('shopping-list');
+      ul.innerHTML = '';
+      shoppingList.forEach((item, idx) => {
+        ul.innerHTML += `
+          <li class="py-3 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggleShoppingItem(${idx})" class="rounded text-indigo-600 focus:ring-indigo-500 h-5 w-5">
+              <span class="${item.done ? 'line-through text-slate-400' : 'font-medium'}">${item.text}</span>
+            </div>
+            <button onclick="deleteShoppingItem(${idx})" class="text-slate-400 hover:text-rose-500">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </li>
+        `;
+      });
+    }
+
+    function addShoppingItem(e) {
+      e.preventDefault();
+      const input = document.getElementById('shopping-input');
+      if (!input.value.trim()) return;
+      shoppingList.push({ text: input.value.trim(), done: false });
+      localStorage.setItem('fw_shopping_list', JSON.stringify(shoppingList));
+      input.value = '';
+      renderShoppingList();
+    }
+
+    function toggleShoppingItem(idx) {
+      shoppingList[idx].done = !shoppingList[idx].done;
+      localStorage.setItem('fw_shopping_list', JSON.stringify(shoppingList));
+      renderShoppingList();
+    }
+
+    function deleteShoppingItem(idx) {
+      shoppingList.splice(idx, 1);
+      localStorage.setItem('fw_shopping_list', JSON.stringify(shoppingList));
+      renderShoppingList();
+    }
+
+    // --- LISTE DE TÂCHES ---
+    function renderTasksList() {
+      const ul = document.getElementById('tasks-list');
+      ul.innerHTML = '';
+      tasksList.forEach((item, idx) => {
+        ul.innerHTML += `
+          <li class="py-3 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggleTaskItem(${idx})" class="rounded text-indigo-600 focus:ring-indigo-500 h-5 w-5">
+              <span class="${item.done ? 'line-through text-slate-400' : 'font-medium'}">${item.text}</span>
+            </div>
+            <button onclick="deleteTaskItem(${idx})" class="text-slate-400 hover:text-rose-500">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </li>
+        `;
+      });
+    }
+
+    function addTaskItem(e) {
+      e.preventDefault();
+      const input = document.getElementById('task-input');
+      if (!input.value.trim()) return;
+      tasksList.push({ text: input.value.trim(), done: false });
+      localStorage.setItem('fw_tasks_list', JSON.stringify(tasksList));
+      input.value = '';
+      renderTasksList();
+    }
+
+    function toggleTaskItem(idx) {
+      tasksList[idx].done = !tasksList[idx].done;
+      localStorage.setItem('fw_tasks_list', JSON.stringify(tasksList));
+      renderTasksList();
+    }
+
+    function deleteTaskItem(idx) {
+      tasksList.splice(idx, 1);
+      localStorage.setItem('fw_tasks_list', JSON.stringify(tasksList));
+      renderTasksList();
+    }
+
+    // --- MENUS DU MOIS ---
+    function renderMenuList() {
+      const container = document.getElementById('menu-grid');
+      container.innerHTML = '';
+
       const year = currentDate.getFullYear();
       const month = currentDate.getMonth();
-
-      document.getElementById('date-display').textContent = currentDate.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
-
-      const firstDay = new Date(year, month, 1);
-      const startingDay = (firstDay.getDay() + 6) % 7;
       const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-      const grid = document.getElementById('month-grid');
-      grid.innerHTML = '';
-      const todayStr = formatDateISO(new Date());
-
-      for (let i = 0; i < startingDay; i++) {
-        const emptyCell = document.createElement('div');
-        emptyCell.className = 'bg-slate-50/50 dark:bg-slate-900/30 rounded-lg p-1 min-h-0 border border-slate-100 dark:border-slate-800 opacity-40';
-        grid.appendChild(emptyCell);
-      }
+      document.getElementById('menu-month-title').textContent = 
+        new Date(year, month, 1).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
 
       for (let day = 1; day <= daysInMonth; day++) {
         const d = new Date(year, month, day);
         const dateStr = formatDateISO(d);
-        const isToday = dateStr === todayStr;
+        const meal = menuList[dateStr] || { midi: '', soir: '' };
 
-        const cell = document.createElement('div');
-        cell.className = `bg-white dark:bg-slate-800 rounded-lg p-1 min-h-0 flex flex-col justify-start border border-slate-200 dark:border-slate-700 cursor-pointer hover:border-indigo-400 transition overflow-hidden ${isToday ? 'ring-2 ring-indigo-500 bg-indigo-50/20' : ''}`;
-        cell.onclick = (evt) => {
-          if(evt.target === cell || evt.target.id === 'day-number') openModalForDateAndHour(dateStr, '08:00');
-        };
-
-        const dayEvents = events.filter(e => e.date === dateStr).sort((a,b) => a.start.localeCompare(b.start));
-
-        let eventsHtml = '';
-        dayEvents.forEach(e => {
-          const timeLabel = e.allDay ? 'Jour' : e.start;
-          eventsHtml += `
-            <div onclick="event.stopPropagation(); editEvent(${e.id})" class="${e.color} text-white text-[9px] px-1 py-0.5 rounded truncate font-medium flex justify-between items-center shadow-xs">
-              <span class="truncate">${e.title}</span>
-              <span class="text-[8px] opacity-80 shrink-0 ml-1 hidden sm:inline">${timeLabel}</span>
+        container.innerHTML += `
+          <div class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-2">
+            <div class="font-bold text-sm text-indigo-600 dark:text-indigo-400 border-b border-slate-100 dark:border-slate-700 pb-1">
+              ${d.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' })}
             </div>
-          `;
-        });
-
-        cell.innerHTML = `
-          <div id="day-number" class="text-right text-[11px] font-bold mb-0.5 leading-none ${isToday ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-600 dark:text-slate-400'}">${day}</div>
-          <div class="space-y-0.5 overflow-hidden flex-1 min-h-0">${eventsHtml}</div>
+            <div>
+              <label class="text-[10px] uppercase font-semibold text-slate-400 block">Midi</label>
+              <input type="text" value="${meal.midi}" onchange="saveMenu('${dateStr}', 'midi', this.value)" class="w-full text-xs px-2 py-1 rounded border border-slate-200 dark:border-slate-600 bg-transparent focus:ring-1 focus:ring-indigo-500">
+            </div>
+            <div>
+              <label class="text-[10px] uppercase font-semibold text-slate-400 block">Soir</label>
+              <input type="text" value="${meal.soir}" onchange="saveMenu('${dateStr}', 'soir', this.value)" class="w-full text-xs px-2 py-1 rounded border border-slate-200 dark:border-slate-600 bg-transparent focus:ring-1 focus:ring-indigo-500">
+            </div>
+          </div>
         `;
-        grid.appendChild(cell);
       }
     }
 
-    function computeOverlapLayout(dayEvents) {
-      const formatted = dayEvents.map(e => {
-        const [sh, sm] = e.start.split(':').map(Number);
-        const [eh, em] = e.end.split(':').map(Number);
-        return { ...e, startMin: sh * 60 + sm, endMin: eh * 60 + em };
-      }).sort((a, b) => a.startMin - b.startMin || (b.endMin - b.startMin) - (a.endMin - a.startMin));
+    function saveMenu(dateStr, type, value) {
+      if (!menuList[dateStr]) menuList[dateStr] = { midi: '', soir: '' };
+      menuList[dateStr][type] = value;
+      localStorage.setItem('fw_menu_list', JSON.stringify(menuList));
+    }
 
-      const columns = [];
-      formatted.forEach(event => {
-        let placed = false;
-        for (let i = 0; i < columns.length; i++) {
-          const lastEventInCol = columns[i][columns[i].length - 1];
-          if (lastEventInCol.endMin <= event.startMin) {
-            columns[i].push(event);
-            event.column = i;
-            placed = true;
-            break;
-          }
-        }
-        if (!placed) {
-          event.column = columns.length;
-          columns.push([event]);
-        }
-      });
+    // --- MODAL & FORMULAIRE ---
+    function selectColor(colorClass) {
+      document.getElementById('event-color-input').value = colorClass;
+    }
 
-      formatted.forEach(event => {
-        const overlapping = formatted.filter(other => 
-          Math.max(event.startMin, other.startMin) < Math.min(event.endMin, other.endMin)
-        );
-        event.maxColumns = Math.max(...overlapping.map(o => o.column)) + 1;
-      });
-
-      return formatted;
+    function toggleAllDayFields() {
+      const isAllDay = document.getElementById('event-allday-input').checked;
+      const timeFields = document.getElementById('time-fields');
+      if (isAllDay) {
+        timeFields.classList.add('hidden');
+      } else {
+        timeFields.classList.remove('hidden');
+      }
     }
 
     function toggleRecurrenceFields() {
-      const enabled = document.getElementById('recurrence-enable').checked;
-      document.getElementById('recurrence-fields').classList.toggle('hidden', !enabled);
+      const isRecurrent = document.getElementById('recurrence-enable').checked;
+      const fields = document.getElementById('recurrence-fields');
+      if (isRecurrent) {
+        fields.classList.remove('hidden');
+      } else {
+        fields.classList.add('hidden');
+      }
     }
 
-    function renderPresets() {
-      const container = document.getElementById('preset-buttons');
-      container.innerHTML = '';
-      presets.forEach(p => {
-        const btn = document.createElement('div');
-        btn.className = `group flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold text-white ${p.color} cursor-pointer hover:opacity-90 transition`;
-        btn.innerHTML = `
-          <span onclick="applyPreset(${p.id})">${p.title} (${p.start}-${p.end})</span>
-          <i onclick="event.stopPropagation(); deletePreset(${p.id})" class="fa-solid fa-xmark text-[10px] ml-1 opacity-70 hover:opacity-100 hover:text-rose-200"></i>
-        `;
-        container.appendChild(btn);
-      });
-    }
-
-    function applyPreset(id) {
-      const preset = presets.find(p => p.id === id);
-      if (!preset) return;
-      document.getElementById('event-title-input').value = preset.title;
-      document.getElementById('event-start-input').value = preset.start;
-      document.getElementById('event-end-input').value = preset.end;
-      document.getElementById('event-allday-input').checked = false;
-      toggleAllDayFields();
-      selectColor(preset.color);
-    }
-
-    function saveCurrentAsPreset() {
-      const title = document.getElementById('event-title-input').value;
-      const start = document.getElementById('event-start-input').value;
-      const end = document.getElementById('event-end-input').value;
-      const color = document.getElementById('event-color-input').value;
-
-      if (!title) return alert("Veuillez saisir au moins un titre.");
-
-      presets.push({ id: Date.now(), title, start, end, color });
-      localStorage.setItem('fw_event_presets', JSON.stringify(presets));
-      renderPresets();
-    }
-
-    function deletePreset(id) {
-      presets = presets.filter(p => p.id !== id);
-      localStorage.setItem('fw_event_presets', JSON.stringify(presets));
-      renderPresets();
-    }
-
-    function openModal() {
-      openModalForDateAndHour(formatDateISO(new Date()), '08:00');
+    function openModalForNewEvent() {
+      openModalForDateAndHour(formatDateISO(new Date()), "08:00");
     }
 
     function openModalForDateAndHour(dateStr, hourStr) {
       document.getElementById('modal-title').textContent = "Nouvel événement";
-      document.getElementById('event-id').value = '';
-      document.getElementById('event-title-input').value = '';
+      document.getElementById('event-id').value = "";
+      document.getElementById('event-title-input').value = "";
       document.getElementById('event-date-input').value = dateStr;
       document.getElementById('event-start-input').value = hourStr;
 
       const [h] = hourStr.split(':').map(Number);
-      const endH = Math.min(h + 1, 23);
-      document.getElementById('event-end-input').value = `${String(endH).padStart(2, '0')}:00`;
+      const endH = String(Math.min(h + 1, 23)).padStart(2, '0');
+      document.getElementById('event-end-input').value = `${endH}:00`;
 
       document.getElementById('event-allday-input').checked = false;
       toggleAllDayFields();
-      
-      const defaultColor = COLOR_PALETTE[0].class;
-      selectColor(defaultColor);
 
       document.getElementById('recurrence-enable').checked = false;
       toggleRecurrenceFields();
 
       document.getElementById('btn-delete').classList.add('hidden');
+      selectColor('bg-indigo-600 border-indigo-700');
       renderPresets();
 
-      const modal = document.getElementById('event-modal');
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
+      document.getElementById('event-modal').classList.remove('hidden');
+      document.getElementById('event-modal').classList.add('flex');
     }
 
     function editEvent(id) {
-      const ev = events.find(e => e.id === id);
-      if (!ev) return;
+      const event = events.find(e => e.id === id);
+      if (!event) return;
 
       document.getElementById('modal-title').textContent = "Modifier l'événement";
-      document.getElementById('event-id').value = ev.id;
-      document.getElementById('event-title-input').value = ev.title;
-      document.getElementById('event-date-input').value = ev.date;
-      document.getElementById('event-start-input').value = ev.start;
-      document.getElementById('event-end-input').value = ev.end;
-      document.getElementById('event-allday-input').checked = !!ev.allDay;
+      document.getElementById('event-id').value = event.id;
+      document.getElementById('event-title-input').value = event.title;
+      document.getElementById('event-date-input').value = event.date;
+      document.getElementById('event-start-input').value = event.start || "08:00";
+      document.getElementById('event-end-input').value = event.end || "18:00";
+      
+      const isAllDay = !!event.allDay;
+      document.getElementById('event-allday-input').checked = isAllDay;
       toggleAllDayFields();
-
-      selectColor(ev.color || COLOR_PALETTE[0].class);
 
       document.getElementById('recurrence-enable').checked = false;
       toggleRecurrenceFields();
 
       document.getElementById('btn-delete').classList.remove('hidden');
+      selectColor(event.color || 'bg-indigo-600 border-indigo-700');
       renderPresets();
 
-      const modal = document.getElementById('event-modal');
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
+      document.getElementById('event-modal').classList.remove('hidden');
+      document.getElementById('event-modal').classList.add('flex');
     }
 
     function closeModal() {
-      const modal = document.getElementById('event-modal');
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
+      document.getElementById('event-modal').classList.add('hidden');
+      document.getElementById('event-modal').classList.remove('flex');
     }
 
     function saveEvent() {
       const id = document.getElementById('event-id').value;
       const title = document.getElementById('event-title-input').value.trim();
       const date = document.getElementById('event-date-input').value;
+      const start = document.getElementById('event-start-input').value;
+      const end = document.getElementById('event-end-input').value;
       const allDay = document.getElementById('event-allday-input').checked;
-      let start = document.getElementById('event-start-input').value;
-      let end = document.getElementById('event-end-input').value;
       const color = document.getElementById('event-color-input').value;
 
-      if (!title || !date) {
-        alert("Veuillez remplir au moins l'intitulé et la date.");
-        return;
-      }
+      if (!title || !date) return alert("Veuillez renseigner au moins un titre et une date.");
 
-      if (allDay) {
-        start = "06:00";
-        end = "23:59";
-      }
-
-      const isRecurrence = document.getElementById('recurrence-enable').checked;
+      const isRecurrent = document.getElementById('recurrence-enable').checked;
 
       if (id) {
-        events = events.map(e => e.id == id ? { id: Number(id), title, date, start, end, color, allDay } : e);
-      } else {
-        if (isRecurrence) {
-          const spanDays = parseInt(document.getElementById('event-span-days').value) || 1;
-          const intervalDays = parseInt(document.getElementById('recurrence-interval').value) || 14;
-          const count = parseInt(document.getElementById('recurrence-count').value) || 4;
+        // Mode modification
+        events = events.map(e => e.id === Number(id) ? { id: Number(id), title, date, start, end, allDay, color } : e);
+      } else if (isRecurrent) {
+        // Mode création avec roulement
+        const spanDays = parseInt(document.getElementById('event-span-days').value) || 1;
+        const interval = parseInt(document.getElementById('recurrence-interval').value) || 14;
+        const cycles = parseInt(document.getElementById('recurrence-count').value) || 1;
 
-          let baseDate = new Date(date);
+        const baseDate = new Date(date);
 
-          for (let i = 0; i < count; i++) {
-            for (let d = 0; d < spanDays; d++) {
-              const currentEvDate = new Date(baseDate);
-              currentEvDate.setDate(baseDate.getDate() + d);
+        for (let c = 0; c < cycles; c++) {
+          for (let s = 0; s < spanDays; s++) {
+            const currentRecDate = new Date(baseDate);
+            currentRecDate.setDate(baseDate.getDate() + (c * interval) + s);
 
-              events.push({
-                id: Date.now() + Math.random(),
-                title,
-                date: formatDateISO(currentEvDate),
-                start,
-                end,
-                color,
-                allDay
-              });
-            }
-            baseDate.setDate(baseDate.getDate() + intervalDays);
+            events.push({
+              id: Date.now() + Math.random(),
+              title,
+              date: formatDateISO(currentRecDate),
+              start,
+              end,
+              allDay,
+              color
+            });
           }
-        } else {
-          events.push({ id: Date.now(), title, date, start, end, color, allDay });
         }
+      } else {
+        // Mode création simple
+        events.push({ id: Date.now(), title, date, start, end, allDay, color });
       }
 
       localStorage.setItem('fw_week_events', JSON.stringify(events));
       closeModal();
       render();
-      loadDashboardData();
+      if (currentView === 'dashboard') loadDashboardData();
     }
 
     function deleteCurrentEvent() {
@@ -1745,15 +837,19 @@
       events = events.filter(e => e.id !== id);
       localStorage.setItem('fw_week_events', JSON.stringify(events));
       render();
-      loadDashboardData();
+      if (currentView === 'dashboard') loadDashboardData();
     }
 
     // --- INITIALISATION AU CHARGEMENT ---
     window.addEventListener('DOMContentLoaded', () => {
       applyDarkMode();
+      setInterval(applyDarkMode, 60000); // Vérification automatique du mode nuit chaque minute
+
+      // Synchronisation initiale
+      renderPresets();
       loadDashboardData();
-      renderTasksList();
       renderShoppingList();
+      renderTasksList();
       renderMenuList();
       render();
     });
