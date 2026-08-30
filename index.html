@@ -496,7 +496,6 @@
       appId: "1:156302642596:web:79908c1088aee1bf49c531"
     };
 
-    // Initialisation de Firebase avec vos configurations du projet data-base-patpat
     const app = initializeApp(firebaseConfig);
     const database = getDatabase(app);
     
@@ -1628,90 +1627,104 @@
 
       document.getElementById('event-allday-input').checked = false;
       toggleAllDayFields();
+      
+      const defaultColor = COLOR_PALETTE[0].class;
+      selectColor(defaultColor);
 
       document.getElementById('recurrence-enable').checked = false;
       toggleRecurrenceFields();
 
       document.getElementById('btn-delete').classList.add('hidden');
-
-      selectColor('bg-indigo-600 border-indigo-700');
       renderPresets();
 
-      document.getElementById('event-modal').classList.remove('hidden');
-      document.getElementById('event-modal').classList.add('flex');
+      const modal = document.getElementById('event-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
     }
 
     function editEvent(id) {
-      const e = events.find(item => item.id === id);
-      if (!e) return;
+      const ev = events.find(e => e.id === id);
+      if (!ev) return;
 
       document.getElementById('modal-title').textContent = "Modifier l'événement";
-      document.getElementById('event-id').value = e.id;
-      document.getElementById('event-title-input').value = e.title;
-      document.getElementById('event-date-input').value = e.date;
-      document.getElementById('event-start-input').value = e.start;
-      document.getElementById('event-end-input').value = e.end;
-
-      document.getElementById('event-allday-input').checked = !!e.allDay;
+      document.getElementById('event-id').value = ev.id;
+      document.getElementById('event-title-input').value = ev.title;
+      document.getElementById('event-date-input').value = ev.date;
+      document.getElementById('event-start-input').value = ev.start;
+      document.getElementById('event-end-input').value = ev.end;
+      document.getElementById('event-allday-input').checked = !!ev.allDay;
       toggleAllDayFields();
+
+      selectColor(ev.color || COLOR_PALETTE[0].class);
 
       document.getElementById('recurrence-enable').checked = false;
       toggleRecurrenceFields();
 
       document.getElementById('btn-delete').classList.remove('hidden');
-
-      selectColor(e.color || 'bg-indigo-600 border-indigo-700');
       renderPresets();
 
-      document.getElementById('event-modal').classList.remove('hidden');
-      document.getElementById('event-modal').classList.add('flex');
+      const modal = document.getElementById('event-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
     }
 
     function closeModal() {
-      document.getElementById('event-modal').classList.add('hidden');
-      document.getElementById('event-modal').classList.remove('flex');
+      const modal = document.getElementById('event-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
     }
 
     function saveEvent() {
       const id = document.getElementById('event-id').value;
       const title = document.getElementById('event-title-input').value.trim();
       const date = document.getElementById('event-date-input').value;
-      const start = document.getElementById('event-start-input').value;
-      const end = document.getElementById('event-end-input').value;
       const allDay = document.getElementById('event-allday-input').checked;
+      let start = document.getElementById('event-start-input').value;
+      let end = document.getElementById('event-end-input').value;
       const color = document.getElementById('event-color-input').value;
 
-      if (!title || !date) return alert("Intitulé et date requis");
+      if (!title || !date) {
+        alert("Veuillez remplir au moins l'intitulé et la date.");
+        return;
+      }
+
+      if (allDay) {
+        start = "06:00";
+        end = "23:59";
+      }
 
       const isRecurrence = document.getElementById('recurrence-enable').checked;
 
       if (id) {
-        events = events.map(e => e.id == id ? { ...e, title, date, start, end, allDay, color } : e);
-      } else if (isRecurrence) {
-        const spanDays = parseInt(document.getElementById('event-span-days').value) || 1;
-        const interval = parseInt(document.getElementById('recurrence-interval').value) || 14;
-        const count = parseInt(document.getElementById('recurrence-count').value) || 4;
-
-        let baseDate = new Date(date);
-
-        for (let cycle = 0; cycle < count; cycle++) {
-          for (let dayOffset = 0; dayOffset < spanDays; dayOffset++) {
-            const evDate = new Date(baseDate);
-            evDate.setDate(baseDate.getDate() + (cycle * interval) + dayOffset);
-
-            events.push({
-              id: Date.now() + Math.random(),
-              title,
-              date: formatDateISO(evDate),
-              start,
-              end,
-              allDay,
-              color
-            });
-          }
-        }
+        events = events.map(e => e.id == id ? { id: Number(id), title, date, start, end, color, allDay } : e);
       } else {
-        events.push({ id: Date.now(), title, date, start, end, allDay, color });
+        if (isRecurrence) {
+          const spanDays = parseInt(document.getElementById('event-span-days').value) || 1;
+          const intervalDays = parseInt(document.getElementById('recurrence-interval').value) || 14;
+          const count = parseInt(document.getElementById('recurrence-count').value) || 4;
+
+          let baseDate = new Date(date);
+
+          for (let i = 0; i < count; i++) {
+            for (let d = 0; d < spanDays; d++) {
+              const currentEvDate = new Date(baseDate);
+              currentEvDate.setDate(baseDate.getDate() + d);
+
+              events.push({
+                id: Date.now() + Math.random(),
+                title,
+                date: formatDateISO(currentEvDate),
+                start,
+                end,
+                color,
+                allDay
+              });
+            }
+            baseDate.setDate(baseDate.getDate() + intervalDays);
+          }
+        } else {
+          events.push({ id: Date.now(), title, date, start, end, color, allDay });
+        }
       }
 
       localStorage.setItem('fw_week_events', JSON.stringify(events));
@@ -1722,8 +1735,10 @@
 
     function deleteCurrentEvent() {
       const id = document.getElementById('event-id').value;
-      if (id) deleteEventDirect(Number(id));
-      closeModal();
+      if (id) {
+        deleteEventDirect(Number(id));
+        closeModal();
+      }
     }
 
     function deleteEventDirect(id) {
@@ -1737,10 +1752,10 @@
     window.addEventListener('DOMContentLoaded', () => {
       applyDarkMode();
       loadDashboardData();
+      renderTasksList();
+      renderShoppingList();
+      renderMenuList();
       render();
-      
-      const taskDateEl = document.getElementById('taskDate');
-      if (taskDateEl) taskDateEl.value = getTodayString();
     });
   </script>
 </body>
